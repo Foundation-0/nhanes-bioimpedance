@@ -1,0 +1,3 @@
+# R packages for survey::svycoxph cross-check (conda-forge pins used in cloud verify).
+# Install: conda install -c conda-forge r-base=4.4 r-survey=4.5 r-haven r-jsonlite
+r-survey==4.5

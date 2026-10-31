@@ -1,0 +1,34 @@
+name: verify
+
+# Re-runs results/cause-specific-mortality/verify.py on pinned Python (and R survey if present).
+# A green run shows the committed certificate.json is reproducible; it is not peer review.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Install R survey (svycoxph check)
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+      - name: R packages
+        run: Rscript -e 'install.packages(c("survey","haven","jsonlite"), repos="https://cloud.r-project.org")'
+      - name: Fetch NHANES files and refit
+        run: python3 pilot/fetch.py && python3 pilot/refit.py
+      - name: make verify
+        run: make verify
+      - name: No drift in results
+        run: git diff --exit-code -- results certificates

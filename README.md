@@ -26,6 +26,7 @@ Part of Foundation0's life-sciences work. It began in the
 | CDC's time delay Td is negative for 46 spectra. 36 of them are in CDC's "questionable" or "bad" fits, and they fit poorly here too: a negative Td marks a bad spectrum. | Claimed. |
 | **DXA lean mass.** A 50 kHz equation predicts DXA lean mass with R² ≈ 0.96 on a held-out survey cycle. The full spectrum adds 0.000–0.002. | Claimed. 11,828 participants, five DXA imputations. |
 | **Mortality.** In adults 20–49, 50 kHz phase angle predicts death (hazard ratio 0.66 per degree, adjusted for age and sex). The full spectrum adds no consistent discrimination: held-out C-index changes of +0.016, +0.001 and −0.008. | Claimed. 5,173 adults, 286 deaths to 2019. Survey weights and a PSU bootstrap; not a full design-based analysis. |
+| **Cause-specific mortality.** Heart, cancer and other leading causes (53, 83 and 150 deaths): cause-specific HR per SD of phase angle 0.80, 0.66 and 0.65; design-based intervals cross-checked with R `survey::svycoxph`. Full spectrum does not consistently beat 50 kHz on held-out C-index by cause. | Claimed. See [results/cause-specific-mortality/PROOF.md](results/cause-specific-mortality/PROOF.md). |
 
 The full output is in [results/pilot-2026-10-31.md](results/pilot-2026-10-31.md) and
 [results/outcomes-2026-10-31.md](results/outcomes-2026-10-31.md).
@@ -84,8 +85,8 @@ The first answer to the project's question is "little, for these outcomes in adu
    NCHS whether the labels are the true frequencies (needs a person).
 2. Test outcomes where cell membranes matter more than fluid volume: hydration and kidney function (serum
    creatinine, cystatin C), inflammation (CRP), and children's growth, all in the same exams.
-3. Repeat the mortality comparison with cause-specific deaths (the files give the leading cause) and with a
-   design-based variance.
+3. ~~Repeat the mortality comparison with cause-specific deaths (the files give the leading cause) and with a
+   design-based variance.~~ Done for leading causes in [results/cause-specific-mortality/](results/cause-specific-mortality/PROOF.md) (issue #6).
 
 The open issues track these.
 
@@ -118,6 +119,7 @@ python3 pilot/outcomes.py  # about 20 seconds
 | [`pilot/cole.py`](pilot/cole.py) | The Cole model and the fit of one spectrum |
 | [`pilot/refit.py`](pilot/refit.py) | Refits every spectrum and compares with CDC |
 | [`pilot/outcomes.py`](pilot/outcomes.py) | Recoverable spectra, DXA lean mass and mortality, held-out cycle |
+| [`pilot/cause_mortality.py`](pilot/cause_mortality.py) | Cause-specific mortality, design-based hazard ratios, held-out C-index by cause |
 | [`results/pilot-2026-10-31.md`](results/pilot-2026-10-31.md) | Refit output |
 | [`results/outcomes-2026-10-31.md`](results/outcomes-2026-10-31.md) | Outcome analyses |
 | [`.github/`](.github/) | Pull request template, task form and the check workflow |
