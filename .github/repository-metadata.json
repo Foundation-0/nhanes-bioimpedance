@@ -1,0 +1,11 @@
+{
+  "description": "Refits the 50-frequency bioimpedance spectra of NHANES 1999-2004 and asks what they show beyond 50 kHz phase angle.",
+  "topics": [
+    "foundation0",
+    "nhanes",
+    "bioimpedance",
+    "open-data",
+    "biophysics",
+    "reproducibility"
+  ]
+}
