@@ -14,7 +14,8 @@
             -0.025875925764621478,
             0.006407822887022862
           ],
-          "n": 1591
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.694148124644108,
@@ -27,7 +28,8 @@
             -0.014843099373381382,
             0.018071034689556825
           ],
-          "n": 1890
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.6999051273581379,
@@ -40,7 +42,8 @@
             -0.03858560535312965,
             0.02494444712860629
           ],
-          "n": 1692
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         }
       ],
       "hr_age_sex_pha50": {
@@ -54,6 +57,12 @@
         ],
         "events": 83,
         "hr_per_sd_pha50": 0.6592927691897436,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        },
         "svycoxph_ci95": [
           0.48582560559,
           0.89465701281
@@ -74,7 +83,8 @@
             0.018572945679726116,
             0.18444953249139753
           ],
-          "n": 1591
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.606902356302459,
@@ -87,7 +97,8 @@
             0.004171222211547644,
             0.16169956910422323
           ],
-          "n": 1890
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.7413453012968104,
@@ -100,7 +111,8 @@
             -0.12087321792566953,
             -0.010057557955402332
           ],
-          "n": 1692
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         }
       ],
       "hr_age_sex_pha50": {
@@ -114,6 +126,12 @@
         ],
         "events": 53,
         "hr_per_sd_pha50": 0.8004317458463928,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        },
         "svycoxph_ci95": [
           0.44745767129,
           1.4314799764
@@ -134,7 +152,8 @@
             0.016650728209052886,
             0.037269171169885616
           ],
-          "n": 1591
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.627362334604217,
@@ -147,7 +166,8 @@
             -0.05844064357986052,
             0.0038641581375427727
           ],
-          "n": 1890
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
           "cindex_age_sex": 0.6559820455044083,
@@ -160,7 +180,8 @@
             -0.0331031251410472,
             0.004858812122292759
           ],
-          "n": 1692
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         }
       ],
       "hr_age_sex_pha50": {
@@ -174,6 +195,12 @@
         ],
         "events": 150,
         "hr_per_sd_pha50": 0.654816225298541,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        },
         "svycoxph_ci95": [
           0.47857752471,
           0.89564297243

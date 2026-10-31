@@ -13,9 +13,18 @@ censoring participants who die from competing causes. Covariates: age, sex, and 
 intervals use a **design-based delete-one-PSU jackknife** in Python (cross-checked against R
 `survey::svycoxph`, which applies Taylor linearisation for this design). Held-out **C-index** by
 survey cycle compares age+sex, +50 kHz phase angle, and +full-spectrum models; bootstrap intervals
-resample PSUs within strata in the test cycle (same scheme as `pilot/outcomes.py`).
+resample PSUs within strata in the test cycle (same scheme as `pilot/outcomes.py`). **Feature scaling for
+held-out C-index:** mean and SD of each covariate are computed on the **training cycles only** and applied
+to the held-out cycle (fix for holdout leakage flagged on PR #8 by grk-proof; see below).
 
-## Cohort (VERIFIED)
+## Hazard ratio scaling (VERIFIED)
+
+Pooled all-cycle Cox models report hazard ratio **per 1 SD increase** in 50 kHz phase angle (adjusted for age
+and sex). SD and mean are **unweighted** sample statistics (`ddof=1`), matching R `scale()` on the analysis
+cohort — **not** survey-weighted moments. The same convention as `pilot/compare_svycoxph.R` (`age_z`, `male_z`,
+`pha50_z`). Survey design enters through **weights** in the partial likelihood and in the design-based variance,
+not through weighted standardization.
+
 
 | Quantity | Value |
 |---|---|
@@ -47,7 +56,45 @@ cause-specific contrasts; report null/weak findings honestly.
 
 Full held-out C-index tables are in `certificate.json`.
 
-## Prior art (KNOWN / not found)
+## Held-out C-index by cause (VERIFIED)
+
+Train on two cycles, evaluate on the third. Covariates standardized with **training-cycle-only** unweighted
+mean and SD (`ddof=1`) before fitting Cox on the training set. Cause-specific events on the test cycle.
+
+**Holdout leakage fix (credit grk-proof, PR #8 review):** An earlier version standardized using moments from
+all three cycles before splitting (same pattern as `pilot/outcomes.py` on PR #8). That is corrected in
+`pilot/cause_mortality.py`. On this cohort the committed C-index values are **unchanged** after the fix
+(linear predictors on the test set stay perfectly rank-correlated; Harrell’s C is rank-based), but the
+procedure now matches proper cycle holdout.
+
+### Heart (53 events total)
+
+| Test cycle | Events | C (age+sex) | C (+phase50) | C (+full) | Full − phase50 | 95% CI (bootstrap) |
+|---|---:|---:|---:|---:|---:|---|
+| 1999–2000 | 17 | 0.588 | 0.581 | 0.663 | +0.082 | (+0.019, +0.184) |
+| 2001–2002 | 25 | 0.607 | 0.611 | 0.686 | +0.075 | (+0.004, +0.162) |
+| 2003–2004 | 11 | 0.741 | 0.768 | 0.708 | −0.060 | (−0.121, −0.010) |
+
+### Cancer (83 events total)
+
+| Test cycle | Events | C (age+sex) | C (+phase50) | C (+full) | Full − phase50 | 95% CI (bootstrap) |
+|---|---:|---:|---:|---:|---:|---|
+| 1999–2000 | 36 | 0.680 | 0.690 | 0.680 | −0.010 | (−0.026, +0.006) |
+| 2001–2002 | 28 | 0.694 | 0.720 | 0.721 | +0.001 | (−0.015, +0.018) |
+| 2003–2004 | 19 | 0.700 | 0.719 | 0.707 | −0.012 | (−0.039, +0.025) |
+
+### Other (150 events total)
+
+| Test cycle | Events | C (age+sex) | C (+phase50) | C (+full) | Full − phase50 | 95% CI (bootstrap) |
+|---|---:|---:|---:|---:|---:|---|
+| 1999–2000 | 57 | 0.686 | 0.612 | 0.638 | +0.027 | (+0.017, +0.037) |
+| 2001–2002 | 60 | 0.627 | 0.639 | 0.616 | −0.023 | (−0.058, +0.004) |
+| 2003–2004 | 33 | 0.656 | 0.699 | 0.688 | −0.011 | (−0.033, +0.005) |
+
+Before/after the train-only scaling fix, every cell above matched the prior (leaky) implementation to
+machine precision on this dataset.
+
+## Cohort (VERIFIED)
 
 Searches on 31 Oct 2026 (PubMed-style, recorded in [notes/reports/literature-survey-2026-10-31.md](../../notes/reports/literature-survey-2026-10-31.md)):
 

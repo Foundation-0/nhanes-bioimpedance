@@ -78,6 +78,12 @@ def fit_hr_pha50(df, cause, rng=None):
         "design_ci95": [lo, hi],
         "bootstrap_ci95": [boot_lo, boot_hi] if boot_lo is not None else None,
         "events": int(e.sum()),
+        "standardization": {
+            "scope": "pooled_all_cycles",
+            "method": "unweighted_sample_mean_and_sd",
+            "ddof": 1,
+            "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+        },
     }
 
 
@@ -85,32 +91,30 @@ def held_out_cindex(df, cause):
     cols_full = MODELS["full_spectrum"]
     cols_base = MODELS["phase50"]
     d = df.dropna(subset=cols_full).reset_index(drop=True)
-    allX = {
-        "age_sex": d[MODELS["age_sex"]].to_numpy(float),
-        "base": d[cols_base].to_numpy(float),
-        "full": d[cols_full].to_numpy(float),
-    }
-    mu = {k: v.mean(0) for k, v in allX.items()}
-    sd = {k: v.std(0, ddof=1) for k, v in allX.items()}
     e_all = cause_specific_event(d, cause)
     rows = []
     for cycle in sorted(d.cycle.unique()):
         trm, tem = (d.cycle != cycle).values, (d.cycle == cycle).values
+        tr = d.loc[trm]
         te = d[tem].reset_index(drop=True)
         e = e_all[tem]
         risks = {}
-        for name, cols, key in (
-            ("age_sex", MODELS["age_sex"], "age_sex"),
-            ("phase50", cols_base, "base"),
-            ("full_spectrum", cols_full, "full"),
+        for name, cols in (
+            ("age_sex", MODELS["age_sex"]),
+            ("phase50", cols_base),
+            ("full_spectrum", cols_full),
         ):
-            Xtr = (d.loc[trm, cols].to_numpy(float) - mu[key]) / sd[key]
-            Xte = (te[cols].to_numpy(float) - mu[key]) / sd[key]
+            raw_tr = tr[cols].to_numpy(float)
+            mu = raw_tr.mean(0)
+            sd = raw_tr.std(0, ddof=1)
+            sd = np.where(sd == 0, 1.0, sd)
+            Xtr = (raw_tr - mu) / sd
+            Xte = (te[cols].to_numpy(float) - mu) / sd
             b, _ = cox_fit(
                 Xtr,
-                d.loc[trm, "months"].to_numpy(float),
+                tr.months.to_numpy(float),
                 e_all[trm],
-                d.loc[trm, "w"].to_numpy(float) / d.loc[trm, "w"].mean(),
+                tr.w.to_numpy(float) / tr.w.mean(),
             )
             risks[name] = Xte @ b
         t, w = te.months.to_numpy(float), te.w.to_numpy(float)
@@ -130,6 +134,7 @@ def held_out_cindex(df, cause):
                 "cindex_full_spectrum": float(cs["full_spectrum"]),
                 "full_minus_phase50": float(cs["full_spectrum"] - cs["phase50"]),
                 "full_minus_phase50_boot_ci95": [float(lo), float(hi)],
+                "standardization": "train_cycles_only_unweighted_mean_sd_ddof1",
             }
         )
     return rows
