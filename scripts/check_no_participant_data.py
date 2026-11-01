@@ -37,14 +37,48 @@ ID_HEADER = re.compile(
 )
 
 TEXT_TABLE_SUFFIXES = (".csv", ".tsv", ".txt", ".json", ".jsonl", ".ipynb")
-CONTENT_SCAN_PREFIXES = ("results/", "certificates/", "commitment/", "notes/")
 
 
-def should_content_scan(rel: str) -> bool:
+def is_pilot_python(rel: str) -> bool:
     n = norm_rel(rel)
-    if any(n.startswith(p) for p in CONTENT_SCAN_PREFIXES):
+    return n.startswith("pilot/") and n.endswith(".py")
+
+
+def is_utf8_text(raw: bytes) -> bool:
+    if b"\x00" in raw[:8192]:
+        return False
+    try:
+        raw.decode("utf-8")
         return True
-    return n.lower().endswith(TEXT_TABLE_SUFFIXES)
+    except UnicodeDecodeError:
+        return False
+
+
+def scan_row_table_rules(rel: str, text: str) -> list[str]:
+    """Detect row-level participant tables in any UTF-8 text (any path or suffix)."""
+    errs: list[str] = []
+    blobs = [text]
+    if "\\n" in text:
+        blobs.append(text.replace("\\n", "\n"))
+    seen: set[str] = set()
+    for blob in blobs:
+        if blob in seen:
+            continue
+        seen.add(blob)
+        lines = blob.splitlines()
+        if not lines:
+            continue
+        if header_has_participant_id(lines[0]) and len(lines) > 1:
+            errs.append(f"{rel}: row-level table with participant id column header")
+        for i, line in enumerate(lines[:-1]):
+            if header_has_participant_id(line) and lines[i + 1].strip():
+                errs.append(f"{rel}: row-level table with participant id column header")
+                break
+        if len(lines) >= 3:
+            bare = sum(1 for ln in lines if BARE_ID_LINE.match(ln))
+            if bare >= 3 and bare / len(lines) >= 0.5:
+                errs.append(f"{rel}: file looks like a list of bare respondent numbers")
+    return errs
 
 
 def git_ls_files() -> list[str]:
@@ -78,7 +112,7 @@ def header_has_participant_id(header_line: str) -> bool:
 
 
 def scan_text_content(rel: str, text: str) -> list[str]:
-    if not should_content_scan(rel):
+    if is_pilot_python(rel):
         return []
     errs: list[str] = []
     n = norm_rel(rel)
@@ -88,16 +122,8 @@ def scan_text_content(rel: str, text: str) -> list[str]:
             errs.append(f"{rel}:{i}: SEQN/respondent literal ({m.group(1)})")
         for m in JSON_ID_KEY.finditer(line):
             errs.append(f"{rel}:{i}: JSON participant id ({m.group(1)})")
+    errs.extend(scan_row_table_rules(rel, text))
     low = n.lower()
-    if low.endswith((".csv", ".tsv", ".txt")):
-        lines = text.splitlines()
-        if lines and header_has_participant_id(lines[0]):
-            if len(lines) > 1:
-                errs.append(f"{rel}: row-level table with participant id column header")
-        if len(lines) >= 3:
-            bare = sum(1 for ln in lines if BARE_ID_LINE.match(ln))
-            if bare >= 3 and bare / len(lines) >= 0.5:
-                errs.append(f"{rel}: file looks like a list of bare respondent numbers")
     if low.endswith(".json"):
         try:
             obj = json.loads(text)
