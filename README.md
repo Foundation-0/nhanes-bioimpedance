@@ -20,7 +20,7 @@ Part of Foundation0's life-sciences work. It began in the
 | Result | Status |
 |---|---|
 | All 13,276 completed exams (1999–2004) have the full 100 values. CDC rates 12,369 fits "excellent", 602 good, marginal, questionable or bad, and 305 "could not be fit". | Counted from CDC's files. |
-| Refitting all 13,276 spectra reproduces CDC's Cole parameters. For "excellent" spectra the median difference is 0.2% for Re, 2.3% for Ri and 1.2% for fc, and 0.011 for alpha; the median relative residual is 0.14%. | Claimed. Not reviewed by a person. Part of the fc difference is rounding: CDC reports fc in whole kHz. |
+| Refitting all 13,276 spectra reproduces CDC's Cole parameters. For "excellent" spectra the median difference is 0.2% for Re, 2.3% for Ri and 1.2% for fc, and 0.011 for alpha; the median relative residual is 0.14%. | Claimed. Not reviewed by a person. These are **medians**, not a declared per-spectrum tolerance; tail errors are much larger (see results log). Part of the fc difference is rounding: CDC reports fc in whole kHz. |
 | The frequencies are those in CDC's variable labels, not an exact logarithmic grid. The labels differ from log spacing below 16 kHz and at 50, 100, 200 and 500 kHz, and the labelled grid fits 85% of spectra better. | Claimed. CDC's documentation calls the grid logarithmically spaced. |
 | 24 of the 305 spectra CDC "could not fit" fit with a residual below 1%. The rest are poor fits for us too (median residual 8%). | Claimed. Spectra not yet inspected by eye. |
 | CDC's time delay Td is negative for 46 spectra. 36 of them are in CDC's "questionable" or "bad" fits, and they fit poorly here too: a negative Td marks a bad spectrum. | Claimed. |

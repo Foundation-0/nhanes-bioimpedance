@@ -20,6 +20,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cole import LABEL_KHZ, R_COLS, X_COLS  # noqa: E402
+from survey_cox import cindex, cox_fit, cox_vcov_design, scale_train  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -148,67 +149,6 @@ def o2(df):
 
 
 # ---------------------------------------------------------------- O3
-def cox_fit(X, t, e, w, iters=100):
-    """Weighted Cox proportional hazards, Breslow ties, Newton-Raphson with step halving.
-    Returns beta for the columns of X (standardise X first)."""
-    n, p = X.shape
-    o = np.argsort(-t, kind="mergesort")
-    X, t, e, w = X[o], t[o], e[o], w[o]
-    # the risk set at time t is everyone with time >= t: up to the last index of t's tie group (descending order)
-    _, first = np.unique(-t, return_index=True)
-    last = np.r_[first[1:] - 1, n - 1]
-    group_end = np.repeat(last, np.diff(np.r_[first, n]))
-    ev = e == 1
-    we = w[ev]
-
-    def parts(beta, need_hess=True):
-        eta = X @ beta
-        shift = eta.max()
-        r = w * np.exp(eta - shift)
-        s0 = np.cumsum(r)[group_end]
-        ll = np.sum(we * (eta[ev] - shift - np.log(s0[ev])))
-        if not need_hess:
-            return ll, None, None
-        s1 = np.cumsum(r[:, None] * X, axis=0)[group_end]
-        s2 = np.cumsum(r[:, None, None] * X[:, :, None] * X[:, None, :], axis=0)[group_end]
-        xbar = s1[ev] / s0[ev, None]
-        grad = (we[:, None] * (X[ev] - xbar)).sum(0)
-        hess = -(we[:, None, None] * (s2[ev] / s0[ev, None, None] - xbar[:, :, None] * xbar[:, None, :])).sum(0)
-        return ll, grad, hess
-
-    beta = np.zeros(p)
-    ll, grad, hess = parts(beta)
-    for _ in range(iters):
-        step = np.linalg.solve(hess, grad)
-        k = 1.0
-        while True:
-            cand = beta - k * step
-            ll_c, _, _ = parts(cand, need_hess=False)
-            if np.isfinite(ll_c) and ll_c >= ll - 1e-12:
-                break
-            k /= 2
-            if k < 1e-8:
-                return beta
-        beta = cand
-        if np.max(np.abs(k * step)) < 1e-9:
-            break
-        ll, grad, hess = parts(beta)
-    return beta
-
-
-def cindex(risk, t, e, w):
-    """Harrell's C, each comparable pair weighted by the product of survey weights."""
-    num = den = 0.0
-    for i in np.where(e == 1)[0]:
-        m = t > t[i]
-        if not m.any():
-            continue
-        ww = w[i] * w[m]
-        num += np.sum(ww * ((risk[i] > risk[m]) + 0.5 * (risk[i] == risk[m])))
-        den += np.sum(ww)
-    return num / den
-
-
 def o3(df):
     sets = {
         "age + sex": ["age", "male"],
@@ -219,23 +159,39 @@ def o3(df):
     d = d.dropna(subset=sorted({c for v in sets.values() for c in v})).reset_index(drop=True)
     print(f"O3. All-cause mortality to 31 Dec 2019, adults 20-49 at the exam: {len(d)} participants, "
           f"{int(d.mortstat.sum())} deaths, median follow-up {d.months.median() / 12:.1f} years")
-    allX = {k: d[v].to_numpy(float) for k, v in sets.items()}
-    mu = {k: v.mean(0) for k, v in allX.items()}
-    sd = {k: v.std(0) for k, v in allX.items()}
-    beta_all = cox_fit((allX["+ 50 kHz phase angle"] - mu["+ 50 kHz phase angle"]) / sd["+ 50 kHz phase angle"],
-                       d.months.to_numpy(float), d.mortstat.to_numpy(int), d.w.to_numpy(float) / d.w.mean())
-    hr = np.exp(beta_all[2] / sd["+ 50 kHz phase angle"][2])
-    print(f"   All cycles, weighted Cox of age, sex and 50 kHz phase angle: hazard ratio {hr:.2f} per degree of phase angle")
+    cols_pha = sets["+ 50 kHz phase angle"]
+    Xp = d[cols_pha].to_numpy(float)
+    mu_p, sd_p, Xpz = scale_train(Xp)
+    t_all = d.months.to_numpy(float)
+    e_all = d.mortstat.to_numpy(int)
+    w_all = d.w.to_numpy(float) / d.w.mean()
+    beta_all, hess_all = cox_fit(Xpz, t_all, e_all, w_all)
+    vcov = cox_vcov_design(Xpz, t_all, e_all, w_all, d.strata.to_numpy(), d.psu.to_numpy(), beta_all, hess_all)
+    se_pha = np.sqrt(vcov[2, 2])
+    hr = np.exp(beta_all[2] / sd_p[2])
+    hr_lo = np.exp((beta_all[2] - 1.96 * se_pha) / sd_p[2])
+    hr_hi = np.exp((beta_all[2] + 1.96 * se_pha) / sd_p[2])
+    print(f"   All cycles, weighted Cox of age, sex and 50 kHz phase angle: hazard ratio {hr:.4f} per degree of phase "
+          f"angle (design-based 95% CI {hr_lo:.4f}-{hr_hi:.4f}; delete-one-PSU jackknife on SDMVSTRA/SDMVPSU)")
     print(f"   {'test cycle':10s} {'n':>5s} {'deaths':>6s}  " + "  ".join(f"{k:>20s}" for k in sets) +
           f"  {'full minus 50 kHz (95% CI)':>28s}")
     for cycle in d.cycle.unique():
-        trm, tem = (d.cycle != cycle).values, (d.cycle == cycle).values
-        te = d[tem].reset_index(drop=True)
+        tr = d[d.cycle != cycle]
+        te = d[d.cycle == cycle].reset_index(drop=True)
         risks = {}
         for k in sets:
-            X = (allX[k] - mu[k]) / sd[k]
-            b = cox_fit(X[trm], d.months.values[trm], d.mortstat.values[trm].astype(int), d.w.values[trm] / d.w.values[trm].mean())
-            risks[k] = X[tem] @ b
+            cols = sets[k]
+            Xtr = tr[cols].to_numpy(float)
+            mu, sd, _ = scale_train(Xtr)
+            Xtr_z = (Xtr - mu) / sd
+            Xte_z = (te[cols].to_numpy(float) - mu) / sd
+            b, _ = cox_fit(
+                Xtr_z,
+                tr.months.to_numpy(float),
+                tr.mortstat.to_numpy(int),
+                tr.w.to_numpy(float) / tr.w.mean(),
+            )
+            risks[k] = Xte_z @ b
         t, e, w = te.months.to_numpy(float), te.mortstat.to_numpy(int), te.w.to_numpy(float)
         cs = {k: cindex(risks[k], t, e, w) for k in sets}
         diffs = []
