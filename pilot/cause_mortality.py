@@ -1,8 +1,10 @@
 """Cause-specific mortality vs 50 kHz phase angle and the full spectrum (issue #6).
 
 Cause-specific Cox models censor competing deaths; these are cause-specific hazards, not Fine-Gray
-subdistribution hazards. Design-based 95% intervals use a delete-one-PSU jackknife (matches
-survey::svycoxph on this cohort; see results/cause-specific-mortality/verify.py).
+subdistribution hazards. Design-based 95% intervals for hazard ratios use R **survey::svycoxph** (Taylor linearisation on the
+NHANES design). A Python delete-one-PSU jackknife is also computed for cross-check; it can disagree on
+CI bounds (see PROOF.md). Held-out **C-index** uses training-cycle-only standardization (fix commit
+873c087 on this branch; grk-proof / PR #8 review).
 """
 from __future__ import annotations
 
@@ -75,7 +77,7 @@ def fit_hr_pha50(df, cause, rng=None):
         boot_lo, boot_hi = [float(x) for x in np.percentile(hrs, [2.5, 97.5])]
     return {
         "hr_per_sd_pha50": hr,
-        "design_ci95": [lo, hi],
+        "jackknife_ci95": [lo, hi],
         "bootstrap_ci95": [boot_lo, boot_hi] if boot_lo is not None else None,
         "events": int(e.sum()),
         "standardization": {
@@ -166,22 +168,21 @@ def build_certificate():
         }
     run_svycoxph_reference()
     ref = json.loads((RESULT_DIR / "svycoxph_reference.json").read_text())
-    out["svycoxph_check"] = {
-        "r_survey": ref["r_survey"],
-        "tolerance_abs_hr_ci": 0.12,
-        "per_cause": {},
-    }
     for cause in CAUSE_SPECS:
-        py = out["causes"][cause]["hr_age_sex_pha50"]["design_ci95"]
+        hr = out["causes"][cause]["hr_age_sex_pha50"]
         rr = ref[cause]
-        out["svycoxph_check"]["per_cause"][cause] = {
-            "svycoxph_ci95": [rr["ci95_lo"], rr["ci95_hi"]],
-            "python_design_ci95": py,
-            "max_abs_gap_vs_svycoxph": max(abs(py[0] - rr["ci95_lo"]), abs(py[1] - rr["ci95_hi"])),
-        }
-        out["causes"][cause]["hr_age_sex_pha50"]["svycoxph_ci95"] = [rr["ci95_lo"], rr["ci95_hi"]]
-    gaps = [v["max_abs_gap_vs_svycoxph"] for v in out["svycoxph_check"]["per_cause"].values()]
-    out["svycoxph_check"]["tolerance_abs_hr_ci"] = float(max(gaps) + 0.01)
+        hr["design_ci95"] = [rr["ci95_lo"], rr["ci95_hi"]]
+        hr["design_ci95_method"] = "survey::svycoxph"
+        gap = max(
+            abs(hr["jackknife_ci95"][0] - rr["ci95_lo"]),
+            abs(hr["jackknife_ci95"][1] - rr["ci95_hi"]),
+        )
+        hr["jackknife_vs_svycoxph_max_abs_ci_gap"] = float(gap)
+        hr["jackknife_ci95_method"] = "delete_one_PSU_jackknife"
+    out["holdout_scaling"] = {
+        "method": "train_cycles_only_unweighted_mean_sd_ddof1",
+        "fixed_in_commit": "873c087dedbcfb0c25bfd985aa2876215f60f970",
+    }
     return out
 
 
@@ -198,8 +199,9 @@ def main():
         hr = block["hr_age_sex_pha50"]
         summary_lines.append(
             f"{cause}: events={hr['events']}, HR per SD phase50={hr['hr_per_sd_pha50']:.3f} "
-            f"design CI ({hr['design_ci95'][0]:.3f}, {hr['design_ci95'][1]:.3f}) "
-            f"bootstrap CI ({hr['bootstrap_ci95'][0]:.3f}, {hr['bootstrap_ci95'][1]:.3f})"
+            f"design CI svycoxph ({hr['design_ci95'][0]:.3f}, {hr['design_ci95'][1]:.3f}) "
+            f"jackknife ({hr['jackknife_ci95'][0]:.3f}, {hr['jackknife_ci95'][1]:.3f}) "
+            f"bootstrap ({hr['bootstrap_ci95'][0]:.3f}, {hr['bootstrap_ci95'][1]:.3f})"
         )
     (RESULT_DIR / "summary.txt").write_text("\n".join(summary_lines) + "\n")
     print("\n".join(summary_lines))

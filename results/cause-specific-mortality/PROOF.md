@@ -9,13 +9,13 @@ residual below 2%), we fit **cause-specific** Cox proportional hazards models fo
 diseases of heart, (2) malignant neoplasms, and (3) all other leading causes (UCOD_LEADING 003–010),
 censoring participants who die from competing causes. Covariates: age, sex, and 50 kHz phase angle
 (per within-cohort standard deviation). Survey design: combined 1999–2004 MEC weights
-(2/3×WTMEC4YR for 1999–2002 and 1/3×WTMEC2YR for 2003–04), SDMVSTRA and SDMVPSU. Hazard ratio
-intervals use a **design-based delete-one-PSU jackknife** in Python (cross-checked against R
-`survey::svycoxph`, which applies Taylor linearisation for this design). Held-out **C-index** by
-survey cycle compares age+sex, +50 kHz phase angle, and +full-spectrum models; bootstrap intervals
-resample PSUs within strata in the test cycle (same scheme as `pilot/outcomes.py`). **Feature scaling for
-held-out C-index:** mean and SD of each covariate are computed on the **training cycles only** and applied
-to the held-out cycle (fix for holdout leakage flagged on PR #8 by grk-proof; see below).
+(2/3×WTMEC4YR for 1999–2002 and 1/3×WTMEC2YR for 2003–04), SDMVSTRA and SDMVPSU. **Reported design 95% CIs**
+use R **`survey::svycoxph`** (Taylor linearisation on the survey design). A Python delete-one-PSU jackknife
+is stored for comparison; it does not match `svycoxph` within 0.01 on CI bounds for heart and other causes
+(see below). Held-out **C-index** by survey cycle compares age+sex, +50 kHz phase angle, and +full-spectrum
+models; bootstrap intervals resample PSUs within strata in the test cycle (same scheme as `pilot/outcomes.py`).
+**Feature scaling for held-out C-index:** mean and SD of each covariate are computed on the **training cycles
+only** (commit `873c087dedbcfb0c25bfd985aa2876215f60f970`, credit grk-proof PR #8 review).
 
 ## Hazard ratio scaling (VERIFIED)
 
@@ -25,6 +25,7 @@ cohort — **not** survey-weighted moments. The same convention as `pilot/compar
 `pha50_z`). Survey design enters through **weights** in the partial likelihood and in the design-based variance,
 not through weighted standardization.
 
+## Cohort (VERIFIED)
 
 | Quantity | Value |
 |---|---|
@@ -48,6 +49,18 @@ cause-specific hazard in this sample.
 | Cancer | 83 | 0.66 | 0.49 – 0.89 | 0.49 – 0.89 | 0.53 – 0.85 |
 | Other | 150 | 0.65 | 0.48 – 0.90 | 0.46 – 0.92 | 0.53 – 0.81 |
 
+**Design CI methods (VERIFIED):** `certificate.json` stores `design_ci95` from **`survey::svycoxph`**
+(pinned R package **survey 4.5-1** in CI). Python **`jackknife_ci95`** refits the Cox model deleting one
+PSU at a time; that is a different variance approximation than the Taylor linearisation inside
+`svycoxph`, so bounds can differ even when point HRs match. Documented max absolute gap on CI bounds
+(jackknife vs svycoxph): heart **0.108**, cancer **0.0005**, other **0.028**. Cancer agrees within 0.01;
+heart and other do not — the jackknife is **not** used as the reported design interval.
+
+**Verify tolerances (pre-declared in `verify.py`, not reverse-fitted):** recomputing
+`compare_svycoxph.R` must match committed `design_ci95` within **0.01** on each CI bound; jackknife gaps
+are recomputed and must match the certificate; if a gap exceeds **0.01**, the certificate must keep
+`design_ci95_method` = `survey::svycoxph` (not jackknife).
+
 **Interpretation (claimed):** Cancer and “other” show HR point estimates below 1 with design intervals
 excluding 1 for cancer (svycoxph). Heart disease has only 53 events; intervals are wide and include
 1. Bootstrap intervals are narrower because the PSU bootstrap does not match the full design-based
@@ -61,11 +74,11 @@ Full held-out C-index tables are in `certificate.json`.
 Train on two cycles, evaluate on the third. Covariates standardized with **training-cycle-only** unweighted
 mean and SD (`ddof=1`) before fitting Cox on the training set. Cause-specific events on the test cycle.
 
-**Holdout leakage fix (credit grk-proof, PR #8 review):** An earlier version standardized using moments from
-all three cycles before splitting (same pattern as `pilot/outcomes.py` on PR #8). That is corrected in
-`pilot/cause_mortality.py`. On this cohort the committed C-index values are **unchanged** after the fix
-(linear predictors on the test set stay perfectly rank-correlated; Harrell’s C is rank-based), but the
-procedure now matches proper cycle holdout.
+**Holdout leakage fix (credit grk-proof, PR #8 review):** Corrected in commit
+`873c087dedbcfb0c25bfd985aa2876215f60f970` — `held_out_cindex` computes μ/σ on **training cycles only**
+(`pilot/cause_mortality.py`, loop over held-out cycle). On this cohort the committed C-index values are
+**unchanged** after the fix (test-set linear predictors stay perfectly rank-correlated; Harrell’s C is
+rank-based), but the procedure now matches proper cycle holdout.
 
 ### Heart (53 events total)
 
@@ -94,9 +107,10 @@ procedure now matches proper cycle holdout.
 Before/after the train-only scaling fix, every cell above matched the prior (leaky) implementation to
 machine precision on this dataset.
 
-## Cohort (VERIFIED)
+## Prior art (KNOWN / not found)
 
 Searches on 31 Oct 2026 (PubMed-style, recorded in [notes/reports/literature-survey-2026-10-31.md](../../notes/reports/literature-survey-2026-10-31.md)):
+
 
 | Reference | What they did | Relation |
 |---|---|---|
@@ -108,13 +122,15 @@ Searches on 31 Oct 2026 (PubMed-style, recorded in [notes/reports/literature-sur
 
 ```bash
 pip install -r requirements.txt
-# R: conda install -c conda-forge r-base=4.4 r-survey=4.5 r-haven r-jsonlite
+# R survey 4.5-1 (see requirements-r.txt):
+#   Rscript -e 'install.packages("remotes"); remotes::install_version("survey","4.5-1", repos="https://cloud.r-project.org")'
 python3 pilot/fetch.py && python3 pilot/refit.py && make verify
 ```
 
-`make verify` regenerates `certificate.json` and requires `git diff` empty afterward. It also re-runs
-`pilot/compare_svycoxph.R` and requires Python jackknife intervals to agree with `svycoxph` within
-the tolerance recorded in the certificate (widest gap on heart disease upper bound).
+`make verify` regenerates `certificate.json` (must match committed file byte-for-byte), re-runs
+`pilot/compare_svycoxph.R`, and checks **numeric** agreement of `design_ci95` with fresh `svycoxph`
+within the fixed **0.01** bound. R `survey` version strings in `svycoxph_reference.json` are not
+compared byte-for-byte. Jackknife gaps are recomputed independently and checked against stored values.
 
 ## Open obligations
 

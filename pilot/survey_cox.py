@@ -1,7 +1,7 @@
-"""Survey-weighted Cox model and design-based variance (delete-one-PSU jackknife).
+"""Survey-weighted Cox model and delete-one-PSU jackknife variance.
 
-Matches R survey::svycoxph for the stratified NHANES design (SDMVSTRA, SDMVPSU, MEC weights)
-within numerical tolerance used in results/cause-specific-mortality/verify.py.
+Jackknife CIs are a secondary check; they can differ from survey::svycoxph Taylor linearisation
+(see results/cause-specific-mortality/PROOF.md).
 """
 from __future__ import annotations
 

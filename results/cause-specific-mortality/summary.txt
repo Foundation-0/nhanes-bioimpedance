@@ -1,5 +1,5 @@
 N=5173, all-cause deaths=286, median follow-up 17.8 y
 
-heart: events=53, HR per SD phase50=0.800 design CI (0.416, 1.539) bootstrap CI (0.571, 1.114)
-cancer: events=83, HR per SD phase50=0.659 design CI (0.486, 0.894) bootstrap CI (0.534, 0.847)
-other: events=150, HR per SD phase50=0.655 design CI (0.464, 0.924) bootstrap CI (0.534, 0.811)
+heart: events=53, HR per SD phase50=0.800 design CI svycoxph (0.447, 1.431) jackknife (0.416, 1.539) bootstrap (0.571, 1.114)
+cancer: events=83, HR per SD phase50=0.659 design CI svycoxph (0.486, 0.895) jackknife (0.486, 0.894) bootstrap (0.534, 0.847)
+other: events=150, HR per SD phase50=0.655 design CI svycoxph (0.479, 0.896) jackknife (0.464, 0.924) bootstrap (0.534, 0.811)

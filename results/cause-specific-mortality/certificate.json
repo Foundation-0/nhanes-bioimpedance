@@ -52,21 +52,24 @@
           0.846523848446178
         ],
         "design_ci95": [
+          0.48582560559,
+          0.89465701281
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 83,
+        "hr_per_sd_pha50": 0.6592927691897436,
+        "jackknife_ci95": [
           0.4860963937967714,
           0.8941990951852387
         ],
-        "events": 83,
-        "hr_per_sd_pha50": 0.6592927691897436,
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.00045791762476132813,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",
           "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
           "scope": "pooled_all_cycles"
-        },
-        "svycoxph_ci95": [
-          0.48582560559,
-          0.89465701281
-        ]
+        }
       },
       "label": "Malignant neoplasms (UCOD_LEADING 002)"
     },
@@ -121,21 +124,24 @@
           1.1144801890834806
         ],
         "design_ci95": [
+          0.44745767129,
+          1.4314799764
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 53,
+        "hr_per_sd_pha50": 0.8004317458463928,
+        "jackknife_ci95": [
           0.41627989651094083,
           1.539087006431658
         ],
-        "events": 53,
-        "hr_per_sd_pha50": 0.8004317458463928,
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.10760703003165806,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",
           "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
           "scope": "pooled_all_cycles"
-        },
-        "svycoxph_ci95": [
-          0.44745767129,
-          1.4314799764
-        ]
+        }
       },
       "label": "Diseases of heart (UCOD_LEADING 001)"
     },
@@ -190,67 +196,35 @@
           0.8105346253156639
         ],
         "design_ci95": [
+          0.47857752471,
+          0.89564297243
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 150,
+        "hr_per_sd_pha50": 0.654816225298541,
+        "jackknife_ci95": [
           0.4640048143293576,
           0.9240944827996378
         ],
-        "events": 150,
-        "hr_per_sd_pha50": 0.654816225298541,
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.028451510369637778,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",
           "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
           "scope": "pooled_all_cycles"
-        },
-        "svycoxph_ci95": [
-          0.47857752471,
-          0.89564297243
-        ]
+        }
       },
       "label": "All other underlying causes (UCOD_LEADING 003-010)"
     }
+  },
+  "holdout_scaling": {
+    "fixed_in_commit": "873c087dedbcfb0c25bfd985aa2876215f60f970",
+    "method": "train_cycles_only_unweighted_mean_sd_ddof1"
   },
   "median_followup_years": 17.75,
   "n": 5173,
   "note": "Associations only; not causal; not clinical guidance. Cause-specific hazards, not subdistribution.",
   "seed": 20261031,
-  "status": "claimed",
-  "svycoxph_check": {
-    "per_cause": {
-      "cancer": {
-        "max_abs_gap_vs_svycoxph": 0.00045791762476132813,
-        "python_design_ci95": [
-          0.4860963937967714,
-          0.8941990951852387
-        ],
-        "svycoxph_ci95": [
-          0.48582560559,
-          0.89465701281
-        ]
-      },
-      "heart": {
-        "max_abs_gap_vs_svycoxph": 0.10760703003165806,
-        "python_design_ci95": [
-          0.41627989651094083,
-          1.539087006431658
-        ],
-        "svycoxph_ci95": [
-          0.44745767129,
-          1.4314799764
-        ]
-      },
-      "other": {
-        "max_abs_gap_vs_svycoxph": 0.028451510369637778,
-        "python_design_ci95": [
-          0.4640048143293576,
-          0.9240944827996378
-        ],
-        "svycoxph_ci95": [
-          0.47857752471,
-          0.89564297243
-        ]
-      }
-    },
-    "r_survey": "4.5",
-    "tolerance_abs_hr_ci": 0.11760703003165805
-  }
+  "status": "claimed"
 }
