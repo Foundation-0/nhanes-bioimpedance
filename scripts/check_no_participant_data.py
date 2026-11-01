@@ -48,10 +48,23 @@ def is_utf8_text(raw: bytes) -> bool:
     if b"\x00" in raw[:8192]:
         return False
     try:
-        raw.decode("utf-8")
+        raw.decode("utf-8-sig")
         return True
     except UnicodeDecodeError:
         return False
+
+
+def decode_for_content_scan(raw: bytes) -> str | None:
+    """Decode tracked file bytes for content rules (UTF-8 with BOM, else Latin-1 fallback)."""
+    if not raw:
+        return ""
+    if b"\x00" in raw[:8192]:
+        return None
+    if is_utf8_text(raw):
+        return raw.decode("utf-8-sig")
+    if _looks_binary(raw):
+        return None
+    return raw.decode("latin-1")
 
 
 def scan_row_table_rules(rel: str, text: str) -> list[str]:
@@ -68,10 +81,10 @@ def scan_row_table_rules(rel: str, text: str) -> list[str]:
         lines = blob.splitlines()
         if not lines:
             continue
-        if header_has_participant_id(lines[0]) and len(lines) > 1:
+        if lines and looks_like_delimited_header_line(lines[0]) and header_has_participant_id(lines[0]) and len(lines) > 1:
             errs.append(f"{rel}: row-level table with participant id column header")
         for i, line in enumerate(lines[:-1]):
-            if header_has_participant_id(line) and lines[i + 1].strip():
+            if looks_like_delimited_header_line(line) and header_has_participant_id(line) and lines[i + 1].strip():
                 errs.append(f"{rel}: row-level table with participant id column header")
                 break
         if len(lines) >= 3:
@@ -101,14 +114,39 @@ def scan_path_rules(rel: str) -> list[str]:
 
 
 def split_header(line: str) -> list[str]:
-    if "\t" in line and "," not in line:
-        return [c.strip() for c in line.split("\t")]
-    return [c.strip() for c in line.split(",")]
+    line = line.lstrip("\ufeff")
+    if "\t" in line and "," not in line and ";" not in line and "|" not in line:
+        parts = line.split("\t")
+    elif ";" in line and ("," not in line or line.count(";") >= line.count(",")):
+        parts = line.split(";")
+    elif "|" in line and ("," not in line or line.count("|") >= line.count(",")):
+        parts = line.split("|")
+    else:
+        parts = line.split(",")
+    return [_normalize_header_cell(c) for c in parts]
+
+
+def _normalize_header_cell(cell: str) -> str:
+    return cell.strip().strip("\ufeff").strip()
 
 
 def header_has_participant_id(header_line: str) -> bool:
     cols = split_header(header_line)
     return any(ID_HEADER.match(c) for c in cols)
+
+
+def looks_like_delimited_header_line(line: str) -> bool:
+    """Skip source-code lines when scanning for CSV/TSV-style headers."""
+    s = line.strip()
+    if not s or len(s) > 400:
+        return False
+    if not re.search(r"[,;\t|]", s):
+        return False
+    if any(c in s for c in "(){}[]=<>\\"):
+        return False
+    if s.startswith(("import ", "from ", "def ", "class ", "#", "//", "r\"", "r'", "f\"", "f'")):
+        return False
+    return True
 
 
 def scan_text_content(rel: str, text: str) -> list[str]:
@@ -231,11 +269,10 @@ def scan_bytes(rel: str, raw: bytes) -> list[str]:
         elif _looks_binary(raw):
             return [f"{rel}: binary content under results/certificates/commitment"]
 
-    try:
-        text = raw.decode("utf-8")
-    except UnicodeDecodeError:
-        if low.endswith((".csv", ".tsv", ".txt", ".json", ".jsonl")):
-            return [f"{rel}: non-text tabular file"]
+    text = decode_for_content_scan(raw)
+    if text is None:
+        if _looks_binary(raw) and not is_pilot_python(rel):
+            return [f"{rel}: non-UTF-8 binary tracked file (content scan fail-closed)"]
         return []
     return scan_text_content(rel, text)
 
