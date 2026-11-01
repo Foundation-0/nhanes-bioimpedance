@@ -102,6 +102,37 @@ def test_csv_gz_with_seqn():
     assert errs
 
 
+def test_extensionless_root_export():
+    errs = guard.scan_text_content("participant_export", _bypass_csv_seqn())
+    assert any("row-level" in e for e in errs)
+
+
+def test_json_file_with_embedded_csv():
+    errs = guard.scan_bytes("docs/data.json", _bypass_csv_seqn().encode())
+    assert any("row-level" in e for e in errs)
+
+
+def test_readme_extra_md_with_csv():
+    errs = guard.scan_text_content("README_extra.md", _bypass_csv_seqn())
+    assert any("row-level" in e for e in errs)
+
+
+def test_legitimate_readme_passes():
+    text = (ROOT / "README.md").read_text()
+    assert not guard.scan_text_content("README.md", text)
+
+
+def test_legitimate_notice_passes():
+    text = (ROOT / "NOTICE.md").read_text()
+    assert not guard.scan_text_content("NOTICE.md", text)
+
+
+def test_legitimate_proof_md_passes():
+    path = ROOT / "results" / "pilot-2026-10-31" / "PROOF.md"
+    if path.exists():
+        assert not guard.scan_text_content(str(path.relative_to(ROOT)), path.read_text())
+
+
 def test_aggregate_pilot_md_passes():
     md = (ROOT / "results" / "pilot-2026-10-31.md").read_text()
     errs = guard.scan_text_content("results/pilot-2026-10-31.md", md)
