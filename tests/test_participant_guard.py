@@ -102,6 +102,39 @@ def test_csv_gz_with_seqn():
     assert errs
 
 
+def test_utf8_bom_csv():
+    raw = b"\xef\xbb\xbfseqn,re\n62161,1\n"
+    errs = guard.scan_bytes("results/bom.csv", raw)
+    assert any("row-level" in e for e in errs)
+
+
+def test_semicolon_delimited_header():
+    key = "seq" + "n"
+    text = f"{key};re\n62161;668\n"
+    errs = guard.scan_text_content("results/euro.csv", text)
+    assert any("row-level" in e for e in errs)
+
+
+def test_pipe_delimited_header():
+    key = "seq" + "n"
+    text = f"{key}|re\n62161|668\n"
+    errs = guard.scan_text_content("results/pipe.tsv", text)
+    assert any("row-level" in e for e in errs)
+
+
+def test_invalid_utf8_extensionless_latin1_fallback():
+    key = "seq" + "n"
+    raw = b"\xff\n" + f"{key},re\n62161,1\n".encode()
+    errs = guard.scan_bytes("participant_export", raw)
+    assert any("row-level" in e for e in errs)
+
+
+def test_invalid_utf8_binary_fail_closed():
+    raw = bytes(range(256))
+    errs = guard.scan_bytes("results/binary_blob", raw)
+    assert any("fail-closed" in e or "binary" in e for e in errs)
+
+
 def test_extensionless_root_export():
     errs = guard.scan_text_content("participant_export", _bypass_csv_seqn())
     assert any("row-level" in e for e in errs)
