@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +38,47 @@ ID_HEADER = re.compile(
 )
 
 TEXT_TABLE_SUFFIXES = (".csv", ".tsv", ".txt", ".json", ".jsonl", ".ipynb")
+
+# REPO-STANDARD section A: og.jpg / favicon / fonts — suffix and magic must agree.
+_WEB_BINARY_RULES: tuple[tuple[re.Pattern[str], Callable[[bytes], bool]], ...] = (
+    (re.compile(r"\.png$", re.I), lambda raw: raw.startswith(b"\x89PNG\r\n\x1a\n")),
+    (re.compile(r"\.jpe?g$", re.I), lambda raw: raw.startswith(b"\xff\xd8\xff")),
+    (
+        re.compile(r"\.gif$", re.I),
+        lambda raw: raw.startswith(b"GIF87a") or raw.startswith(b"GIF89a"),
+    ),
+    (re.compile(r"\.ico$", re.I), lambda raw: len(raw) >= 4 and raw[:4] == b"\x00\x00\x01\x00"),
+    (re.compile(r"\.woff2$", re.I), lambda raw: len(raw) >= 4 and raw[:4] == b"wOF2"),
+    (re.compile(r"\.woff$", re.I), lambda raw: len(raw) >= 4 and raw[:4] == b"wOFF"),
+    (
+        re.compile(r"\.webp$", re.I),
+        lambda raw: len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WEBP",
+    ),
+)
+
+
+def _web_binary_rule_for_path(rel: str) -> re.Pattern[str] | None:
+    n = norm_rel(rel)
+    for pat, _ in _WEB_BINARY_RULES:
+        if pat.search(n):
+            return pat
+    return None
+
+
+def _web_binary_magic_ok(rel: str, raw: bytes) -> bool:
+    n = norm_rel(rel)
+    for pat, magic_ok in _WEB_BINARY_RULES:
+        if pat.search(n):
+            return magic_ok(raw)
+    return False
+
+
+def _allowed_standard_web_binary(rel: str, raw: bytes) -> bool:
+    return _web_binary_rule_for_path(rel) is not None and _web_binary_magic_ok(rel, raw)
+
+
+def _web_binary_suffix_magic_mismatch(rel: str, raw: bytes) -> bool:
+    return _web_binary_rule_for_path(rel) is not None and not _web_binary_magic_ok(rel, raw)
 
 
 def is_pilot_python(rel: str) -> bool:
@@ -127,7 +169,9 @@ def split_header(line: str) -> list[str]:
 
 
 def _normalize_header_cell(cell: str) -> str:
-    return cell.strip().strip("\ufeff").strip()
+    cell = cell.strip().strip("\ufeff").strip()
+    cell = re.sub(r"^[^A-Za-z0-9]+", "", cell)
+    return cell
 
 
 def header_has_participant_id(header_line: str) -> bool:
@@ -259,6 +303,12 @@ def scan_bytes(rel: str, raw: bytes) -> list[str]:
 
     if raw[:4] == b"PAR1":
         return _scan_parquet_bytes(rel, raw)
+
+    if _allowed_standard_web_binary(rel, raw):
+        return []
+
+    if _web_binary_suffix_magic_mismatch(rel, raw):
+        return [f"{rel}: web asset extension without matching file magic (fail-closed)"]
 
     if low.endswith(".feather") or (len(raw) > 8 and raw[:8] == b"ARROW1\x00"):
         return _scan_feather_bytes(rel, raw)
