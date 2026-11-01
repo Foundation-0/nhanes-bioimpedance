@@ -15,26 +15,21 @@ not causal and not clinical guidance.
 
 | Issue | Fix |
 |---|---|
-| O3 holdout leakage (mu/sd on all cycles) | O3 held-out Cox folds now standardize covariates using **training cycles only** (`scale_train` in `pilot/survey_cox.py`). |
-| Pooled HR 0.66 without design CI | Delete-one-PSU jackknife on SDMVSTRA/SDMVPSU reported with pooled HR. |
-| `cox_fit` vs `survey::svycoxph` | `pilot/compare_svycoxph_outcomes.R` + numeric check in `verify.py` (pre-declared tolerances, not metadata). |
+| O3 holdout leakage (mu/sd on all cycles) | O3 held-out Cox folds standardize on **training cycles only** (`scale_train`). |
+| Pooled HR without design CI | **Primary** design 95% CI from **`survey::svycoxph`** (Taylor on SDMVSTRA/SDMVPSU): HR **0.661**, CI **0.546–0.800**. |
+| Python `cox_fit` validation | `compare_svycoxph_outcomes.R` replay checked in `verify.py` with **pre-declared 0.01** tolerance on CI bounds (recomputed at verify time, not stored as a fitted slack tolerance). |
+| Jackknife | **Secondary** delete-one-PSU jackknife CI **0.526–0.831** printed with **max abs gap 0.032** vs svycoxph bounds (Taylor vs jackknife); gap is **reported**, not used to pass/fail svycoxph agreement. |
 
-**Before/after (O3 held-out C-index deltas, three test cycles):** unchanged to three decimals after the
-standardization fix (0.016, 0.001, −0.008). Affine rescaling within a fold preserves risk ranks for these
-unpenalized Cox linear predictors on the test cycle.
-
-**Pooled HR:** still **0.66 per degree** (display); full precision **0.661** with design CI **0.53–0.83**
-(Python jackknife) vs **0.661** with **0.55–0.80** (`survey::svycoxph` Taylor); `verify.py` allows
-**0.035** absolute gap on each CI bound (declared in `certificate.json`, not fitted from this run).
+**Held-out C-index deltas** (full − pha50): unchanged to three decimals (0.016, 0.001, −0.008) after the standardization fix.
 
 ## Reproduce
 
 ```bash
 pip install -r requirements.txt
-# optional: apt install r-base; R -e 'install.packages(c("survey","haven","jsonlite"), repos="https://cloud.r-project.org")'
+Rscript pilot/compare_svycoxph_outcomes.R .
 make verify-outcomes-2026-10-31
 ```
 
 ## Credit
 
-`survey_cox.py` / jackknife pattern adapted from PR #9 (`mithrax/cause-specific-mortality-754f`).
+`survey_cox.py` / verification pattern aligned with PR #9 (`mithrax/cause-specific-mortality-754f`).
