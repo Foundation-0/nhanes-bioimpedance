@@ -1,7 +1,7 @@
 """Survey-weighted Cox model and delete-one-PSU jackknife variance.
 
 Jackknife CIs are a secondary check; they can differ from survey::svycoxph Taylor linearisation
-(see results/cause-specific-mortality/PROOF.md).
+(see results/cause-specific-mortality/PROOF.md and results/outcomes-2026-10-31/PROOF.md).
 """
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def cox_fit(X, t, e, w, iters=100):
 
 
 def cox_vcov_design(X, t, e, w, strata, psu, beta, hess):
-    """Design-based covariance via delete-one-PSU jackknife (matches survey::svycoxph here)."""
+    """Design-based covariance via delete-one-PSU jackknife."""
     strata = np.asarray(strata)
     psu = np.asarray(psu)
     keys = [(int(s), int(p)) for s in np.unique(strata) for p in np.unique(psu[strata == s])]
@@ -82,3 +82,11 @@ def cindex(risk, t, e, w):
         num += np.sum(ww * ((risk[i] > risk[m]) + 0.5 * (risk[i] == risk[m])))
         den += np.sum(ww)
     return num / den if den else float("nan")
+
+
+def scale_train(X_train: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Unweighted mean and sample SD (ddof=1) on training rows; zero SD -> 1."""
+    mu = X_train.mean(0)
+    sd = X_train.std(0, ddof=1)
+    sd = np.where(sd == 0, 1.0, sd)
+    return mu, sd, (X_train - mu) / sd

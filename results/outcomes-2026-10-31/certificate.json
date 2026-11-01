@@ -1,0 +1,25 @@
+{
+  "result_id": "outcomes-2026-10-31",
+  "evidence_label": "VERIFIED",
+  "scope": "Aggregate O1–O3 from pilot/outcomes.py; associations only, not causal.",
+  "o3_n": 5173,
+  "o3_deaths": 286,
+  "o3_median_followup_years": 17.8,
+  "hr_pha50_per_degree": 0.6612103036053866,
+  "hr_pha50_ci95_lo": 0.5259771034542562,
+  "hr_pha50_ci95_hi": 0.8312131131235647,
+  "cindex_holdout_1999_2000_full_minus_pha50": 0.016,
+  "cindex_holdout_2001_2002_full_minus_pha50": 0.001,
+  "cindex_holdout_2003_2004_full_minus_pha50": -0.008,
+  "svycoxph_check": {
+    "tolerance_abs_hr": 0.01,
+    "tolerance_abs_ci_bound": 0.035,
+    "reference_hr_per_degree": 0.66096053742,
+    "reference_ci95_lo": 0.54641175495,
+    "reference_ci95_hi": 0.79952312165
+  },
+  "checks": {
+    "abs_int_tolerance": 0,
+    "abs_float_tolerance": 0.0005
+  }
+}

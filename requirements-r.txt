@@ -1,3 +1,4 @@
-# Pin for svycoxph reference (see results/cause-specific-mortality/verify.py).
-# CI: install.packages('remotes'); remotes::install_version('survey', '4.5-1', repos='https://cloud.r-project.org')
+# Pin for svycoxph reference (see results/*/verify.py). CI installs via remotes::install_version.
 survey==4.5-1
+haven>=2.5
+jsonlite>=1.8
