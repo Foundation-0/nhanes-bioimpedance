@@ -1,0 +1,18 @@
+{
+  "result_id": "pilot-2026-10-31",
+  "evidence_label": "VERIFIED",
+  "scope": "Aggregate refit of NHANES 1999-2004 BIX spectra vs CDC Cole parameters; no row-level data.",
+  "spectra_refitted": 13276,
+  "completed_exams_with_all_frequencies": 13276,
+  "log_grid_better_fraction": 0.85,
+  "excellent_n": 12369,
+  "excellent_re_median_rel_pct": 0.2,
+  "excellent_ri_median_rel_pct": 2.3,
+  "excellent_fc_median_rel_pct": 1.2,
+  "phase_50k_median_deg": 6.58,
+  "fits_csv_sha256": "c075b4eecc234411af8b416c13591ecdec23997ee6f8a41becb5c45e6acd5f00",
+  "checks": {
+    "abs_int_tolerance": 0,
+    "abs_float_tolerance": 0.02
+  }
+}

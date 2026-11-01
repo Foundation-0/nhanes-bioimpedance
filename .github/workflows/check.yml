@@ -15,15 +15,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install test deps
+        run: pip install -r requirements.txt pyarrow pytest
       - name: The pilot scripts compile
-        run: python -m py_compile pilot/*.py
+        run: python -m py_compile pilot/*.py scripts/*.py
       - name: No per-participant data is committed
-        run: |
-          if git ls-files | grep -iE '(^data/|\.xpt$|fits\.csv$)'; then
-            echo "Per-participant data must not be committed (see the policy in README.md)."
-            exit 1
-          fi
-          if git grep -nE '\bSEQN[,= :]+[0-9]{4,}'; then
-            echo "Respondent numbers found. Commit aggregate results only."
-            exit 1
-          fi
+        run: python3 scripts/check_no_participant_data.py
+      - name: Participant guard unit tests
+        run: pytest -q tests/test_participant_guard.py
