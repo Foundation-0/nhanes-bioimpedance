@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 d23031365b9e6aebb8e4bf1ccf67db6dd157ac2bdc020c7894cad80e90f9bfc6  certificates/SHA256SUMS
 984c2a52c3c5b8b11b6fb4ffa96f55c518b27baadb1a38b4d561ded5dc2ab525  Makefile
 89e6998b8a6712bdf628397d2d410c847cc4374c1844971cb7dd8d96acd99e24  scripts/check_no_participant_data.py
+=======
+1c0c3c9583e542830992f451c10b034ed51babdb1e3174b603bf7e55236bbca3  scripts/check_no_participant_data.py
+fab578377852bd7ea12155435c39613bd92b0d8af491b3f7caeb3d5587bddfaa  certificates/SHA256SUMS
+c6d0be81707e38e1b7767a02c79db1b903c1cc64737c243702fb7f77099a2061  Makefile
+>>>>>>> origin/claude/outcomes
