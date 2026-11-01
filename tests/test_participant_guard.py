@@ -201,3 +201,69 @@ def test_script_catches_staged_bypass_in_temp_repo(tmp_path: Path):
         text=True,
     )
     assert proc.returncode != 0
+
+
+def _minimal_png() -> bytes:
+    return b"\x89PNG\r\n\x1a\n" + b"\x00" * 8
+
+
+def _minimal_jpeg() -> bytes:
+    return b"\xff\xd8\xff\xe0" + b"\x00" * 4
+
+
+def _minimal_gif() -> bytes:
+    return b"GIF89a" + b"\x00" * 8
+
+
+def _minimal_ico() -> bytes:
+    return b"\x00\x00\x01\x00" + b"\x00" * 12
+
+
+def _minimal_woff2() -> bytes:
+    return b"wOF2" + b"\x00" * 8
+
+
+def _minimal_woff() -> bytes:
+    return b"wOFF" + b"\x00" * 8
+
+
+def _minimal_webp() -> bytes:
+    return b"RIFF" + b"\x00" * 4 + b"WEBP" + b"\x00" * 4
+
+
+@pytest.mark.parametrize(
+    "rel,body",
+    [
+        ("og.png", _minimal_png()),
+        ("og.jpg", _minimal_jpeg()),
+        ("favicon.ico", _minimal_ico()),
+        ("site/font.woff2", _minimal_woff2()),
+        ("site/font.woff", _minimal_woff()),
+        ("img/logo.webp", _minimal_webp()),
+    ],
+)
+def test_standard_web_binary_allowed(rel: str, body: bytes):
+    assert not guard.scan_bytes(rel, body)
+
+
+@pytest.mark.parametrize(
+    "rel,body",
+    [
+        ("og.png", b"seqn,re\n62161,1\n"),
+        ("og.png", b"fakepng-content-without-magic"),
+        ("og.jpg", b"not jpeg"),
+        ("favicon.ico", b"ICO"),
+        ("site/font.woff2", b"woff2 fake"),
+    ],
+)
+def test_standard_web_binary_suffix_magic_mismatch_fails(rel: str, body: bytes):
+    errs = guard.scan_bytes(rel, body)
+    assert errs
+
+
+def test_latin1_leading_byte_glued_to_seqn_header():
+    key = "seq" + "n"
+    raw = b"\xff" + f"{key},re\n62161,1\n".encode()
+    errs = guard.scan_bytes("participant_export", raw)
+    assert any("row-level" in e for e in errs)
+
