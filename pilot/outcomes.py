@@ -12,6 +12,7 @@ combined 1999-2004 MEC weight (2/3 x WTMEC4YR for 1999-2002, 1/3 x WTMEC2YR for 
 combining cycles) weights the model fits and the test statistics. Confidence intervals come from a bootstrap that
 resamples primary sampling units within strata (SDMVSTRA, SDMVPSU) in the test cycle.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -24,6 +25,7 @@ from survey_cox import cindex, cox_fit, cox_vcov_design, scale_train  # noqa: E4
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
+SVY_REF = ROOT / "results" / "outcomes-2026-10-31" / "svycoxph_reference.json"
 CYCLES = [("1999-2000", "", "1999_2000"), ("2001-2002", "_B", "2001_2002"), ("2003-2004", "_C", "2003_2004")]
 RNG = np.random.default_rng(20261031)
 NBOOT = 300
@@ -168,11 +170,24 @@ def o3(df):
     beta_all, hess_all = cox_fit(Xpz, t_all, e_all, w_all)
     vcov = cox_vcov_design(Xpz, t_all, e_all, w_all, d.strata.to_numpy(), d.psu.to_numpy(), beta_all, hess_all)
     se_pha = np.sqrt(vcov[2, 2])
-    hr = np.exp(beta_all[2] / sd_p[2])
-    hr_lo = np.exp((beta_all[2] - 1.96 * se_pha) / sd_p[2])
-    hr_hi = np.exp((beta_all[2] + 1.96 * se_pha) / sd_p[2])
-    print(f"   All cycles, weighted Cox of age, sex and 50 kHz phase angle: hazard ratio {hr:.4f} per degree of phase "
-          f"angle (design-based 95% CI {hr_lo:.4f}-{hr_hi:.4f}; delete-one-PSU jackknife on SDMVSTRA/SDMVPSU)")
+    hr_pt = np.exp(beta_all[2] / sd_p[2])
+    jk_lo = np.exp((beta_all[2] - 1.96 * se_pha) / sd_p[2])
+    jk_hi = np.exp((beta_all[2] + 1.96 * se_pha) / sd_p[2])
+    if not SVY_REF.exists():
+        raise FileNotFoundError(
+            f"Missing {SVY_REF}; run Rscript pilot/compare_svycoxph_outcomes.R before outcomes.py"
+        )
+    svy = json.loads(SVY_REF.read_text())
+    svy_lo, svy_hi = float(svy["ci95_lo"]), float(svy["ci95_hi"])
+    jk_gap = max(abs(jk_lo - svy_lo), abs(jk_hi - svy_hi))
+    print(
+        f"   All cycles, weighted Cox of age, sex and 50 kHz phase angle: hazard ratio {svy['hr_pha50_per_degree']:.4f} "
+        f"per degree (design 95% CI survey::svycoxph {svy_lo:.4f}-{svy_hi:.4f}; Taylor on SDMVSTRA/SDMVPSU)"
+    )
+    print(
+        f"   Secondary Python delete-one-PSU jackknife 95% CI {jk_lo:.4f}-{jk_hi:.4f} "
+        f"(point HR {hr_pt:.4f}; max abs gap vs svycoxph CI bounds {jk_gap:.4f})"
+    )
     print(f"   {'test cycle':10s} {'n':>5s} {'deaths':>6s}  " + "  ".join(f"{k:>20s}" for k in sets) +
           f"  {'full minus 50 kHz (95% CI)':>28s}")
     for cycle in d.cycle.unique():
