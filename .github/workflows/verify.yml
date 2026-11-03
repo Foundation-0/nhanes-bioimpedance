@@ -1,0 +1,25 @@
+# Green CI reruns aggregate verifiers and the participant-data guard; it does not prove clinical truth or peer review.
+
+name: verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned Python deps
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: make verify
+        run: make verify
+      - name: Working tree clean after verify
+        run: git diff --exit-code -- results certificates commitment
