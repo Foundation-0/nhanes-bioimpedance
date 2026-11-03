@@ -1,4 +1,4 @@
-# Re-runs all result verifiers and the participant-data guard on pinned Python and R survey 4.5-1.
+# Re-runs all result verifiers and the participant-data guard on pinned Python and R survey 4.5.
 # Green CI shows committed certificates are reproducible; it is not peer review or clinical validation.
 
 name: verify

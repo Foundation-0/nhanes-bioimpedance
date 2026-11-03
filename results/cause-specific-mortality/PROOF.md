@@ -50,7 +50,7 @@ cause-specific hazard in this sample.
 | Other | 150 | 0.65 | 0.48 – 0.90 | 0.46 – 0.92 | 0.53 – 0.81 |
 
 **Design CI methods (VERIFIED):** `certificate.json` stores `design_ci95` from **`survey::svycoxph`**
-(pinned R package **survey 4.5-1** in CI). Python **`jackknife_ci95`** refits the Cox model deleting one
+(pinned R package **survey 4.5** in CI). Python **`jackknife_ci95`** refits the Cox model deleting one
 PSU at a time; that is a different variance approximation than the Taylor linearisation inside
 `svycoxph`, so bounds can differ even when point HRs match. Documented max absolute gap on CI bounds
 (jackknife vs svycoxph): heart **0.108**, cancer **0.0005**, other **0.028**. Cancer agrees within 0.01;
@@ -122,8 +122,8 @@ Searches on 31 Oct 2026 (PubMed-style, recorded in [notes/reports/literature-sur
 
 ```bash
 pip install -r requirements.txt
-# R survey 4.5-1 (see requirements-r.txt):
-#   Rscript -e 'install.packages("remotes"); remotes::install_version("survey","4.5-1", repos="https://cloud.r-project.org")'
+# R survey 4.5 (see requirements-r.txt):
+#   Rscript -e 'install.packages("remotes"); remotes::install_version("survey","4.5", repos="https://cloud.r-project.org")'
 python3 pilot/fetch.py && python3 pilot/refit.py && make verify
 ```
 
