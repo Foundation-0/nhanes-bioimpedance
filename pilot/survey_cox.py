@@ -1,7 +1,7 @@
-"""Survey-weighted Cox model and design-based variance (delete-one-PSU jackknife).
+"""Survey-weighted Cox model and delete-one-PSU jackknife variance.
 
-Adapted from PR #9 (mithrax/cause-specific-mortality-754f) survey::svycoxph cross-check pattern; used here for
-all-cause mortality in pilot/outcomes.py.
+Jackknife CIs are a secondary check; they can differ from survey::svycoxph Taylor linearisation
+(see results/cause-specific-mortality/PROOF.md and results/outcomes-2026-10-31/PROOF.md).
 """
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def cox_fit(X, t, e, w, iters=100):
 
 
 def cox_vcov_design(X, t, e, w, strata, psu, beta, hess):
-    """Design-based covariance via delete-one-PSU jackknife (matches survey::svycoxph here)."""
+    """Design-based covariance via delete-one-PSU jackknife."""
     strata = np.asarray(strata)
     psu = np.asarray(psu)
     keys = [(int(s), int(p)) for s in np.unique(strata) for p in np.unique(psu[strata == s])]

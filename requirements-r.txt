@@ -1,3 +1,4 @@
-survey>=4.2
+# Pin for svycoxph reference (see results/*/verify.py). CI installs via remotes::install_version.
+survey==4.5
 haven>=2.5
 jsonlite>=1.8

@@ -1,0 +1,230 @@
+{
+  "all_cause_deaths": 286,
+  "causes": {
+    "cancer": {
+      "held_out_cindex": [
+        {
+          "cindex_age_sex": 0.6799050764465859,
+          "cindex_full_spectrum": 0.6796549638643802,
+          "cindex_phase50": 0.689821752493102,
+          "cycle": "1999-2000",
+          "events": 36,
+          "full_minus_phase50": -0.010166788628721779,
+          "full_minus_phase50_boot_ci95": [
+            -0.025875925764621478,
+            0.006407822887022862
+          ],
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.694148124644108,
+          "cindex_full_spectrum": 0.7208677343220413,
+          "cindex_phase50": 0.7200439401594945,
+          "cycle": "2001-2002",
+          "events": 28,
+          "full_minus_phase50": 0.0008237941625468537,
+          "full_minus_phase50_boot_ci95": [
+            -0.014843099373381382,
+            0.018071034689556825
+          ],
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.6999051273581379,
+          "cindex_full_spectrum": 0.7069533029367773,
+          "cindex_phase50": 0.7194424677221931,
+          "cycle": "2003-2004",
+          "events": 19,
+          "full_minus_phase50": -0.01248916478541584,
+          "full_minus_phase50_boot_ci95": [
+            -0.03858560535312965,
+            0.02494444712860629
+          ],
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        }
+      ],
+      "hr_age_sex_pha50": {
+        "bootstrap_ci95": [
+          0.5342426788464749,
+          0.846523848446178
+        ],
+        "design_ci95": [
+          0.48582560559,
+          0.89465701281
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 83,
+        "hr_per_sd_pha50": 0.6592927691897436,
+        "jackknife_ci95": [
+          0.4860963937967714,
+          0.8941990951852387
+        ],
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.00045791762476132813,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        }
+      },
+      "label": "Malignant neoplasms (UCOD_LEADING 002)"
+    },
+    "heart": {
+      "held_out_cindex": [
+        {
+          "cindex_age_sex": 0.5884270660819827,
+          "cindex_full_spectrum": 0.6631133488513526,
+          "cindex_phase50": 0.5807489946583682,
+          "cycle": "1999-2000",
+          "events": 17,
+          "full_minus_phase50": 0.08236435419298449,
+          "full_minus_phase50_boot_ci95": [
+            0.018572945679726116,
+            0.18444953249139753
+          ],
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.606902356302459,
+          "cindex_full_spectrum": 0.6862201157910063,
+          "cindex_phase50": 0.6107580937191222,
+          "cycle": "2001-2002",
+          "events": 25,
+          "full_minus_phase50": 0.07546202207188413,
+          "full_minus_phase50_boot_ci95": [
+            0.004171222211547644,
+            0.16169956910422323
+          ],
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.7413453012968104,
+          "cindex_full_spectrum": 0.7079688740769319,
+          "cindex_phase50": 0.7681432286331553,
+          "cycle": "2003-2004",
+          "events": 11,
+          "full_minus_phase50": -0.06017435455622344,
+          "full_minus_phase50_boot_ci95": [
+            -0.12087321792566953,
+            -0.010057557955402332
+          ],
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        }
+      ],
+      "hr_age_sex_pha50": {
+        "bootstrap_ci95": [
+          0.5705694050422001,
+          1.1144801890834806
+        ],
+        "design_ci95": [
+          0.44745767129,
+          1.4314799764
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 53,
+        "hr_per_sd_pha50": 0.8004317458463928,
+        "jackknife_ci95": [
+          0.41627989651094083,
+          1.539087006431658
+        ],
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.10760703003165806,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        }
+      },
+      "label": "Diseases of heart (UCOD_LEADING 001)"
+    },
+    "other": {
+      "held_out_cindex": [
+        {
+          "cindex_age_sex": 0.6862036815450002,
+          "cindex_full_spectrum": 0.6382857572927844,
+          "cindex_phase50": 0.6117760638927845,
+          "cycle": "1999-2000",
+          "events": 57,
+          "full_minus_phase50": 0.026509693399999867,
+          "full_minus_phase50_boot_ci95": [
+            0.016650728209052886,
+            0.037269171169885616
+          ],
+          "n": 1591,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.627362334604217,
+          "cindex_full_spectrum": 0.6164219886114755,
+          "cindex_phase50": 0.6390026462740005,
+          "cycle": "2001-2002",
+          "events": 60,
+          "full_minus_phase50": -0.02258065766252504,
+          "full_minus_phase50_boot_ci95": [
+            -0.05844064357986052,
+            0.0038641581375427727
+          ],
+          "n": 1890,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        },
+        {
+          "cindex_age_sex": 0.6559820455044083,
+          "cindex_full_spectrum": 0.6875644487263792,
+          "cindex_phase50": 0.6988415954318662,
+          "cycle": "2003-2004",
+          "events": 33,
+          "full_minus_phase50": -0.011277146705486962,
+          "full_minus_phase50_boot_ci95": [
+            -0.0331031251410472,
+            0.004858812122292759
+          ],
+          "n": 1692,
+          "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
+        }
+      ],
+      "hr_age_sex_pha50": {
+        "bootstrap_ci95": [
+          0.5343767616510888,
+          0.8105346253156639
+        ],
+        "design_ci95": [
+          0.47857752471,
+          0.89564297243
+        ],
+        "design_ci95_method": "survey::svycoxph",
+        "events": 150,
+        "hr_per_sd_pha50": 0.654816225298541,
+        "jackknife_ci95": [
+          0.4640048143293576,
+          0.9240944827996378
+        ],
+        "jackknife_ci95_method": "delete_one_PSU_jackknife",
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.028451510369637778,
+        "standardization": {
+          "ddof": 1,
+          "method": "unweighted_sample_mean_and_sd",
+          "note": "Same as R scale() on age, male, pha50; not survey-weighted.",
+          "scope": "pooled_all_cycles"
+        }
+      },
+      "label": "All other underlying causes (UCOD_LEADING 003-010)"
+    }
+  },
+  "holdout_scaling": {
+    "fixed_in_commit": "873c087dedbcfb0c25bfd985aa2876215f60f970",
+    "method": "train_cycles_only_unweighted_mean_sd_ddof1"
+  },
+  "median_followup_years": 17.75,
+  "n": 5173,
+  "note": "Associations only; not causal; not clinical guidance. Cause-specific hazards, not subdistribution.",
+  "seed": 20261031,
+  "status": "claimed"
+}
