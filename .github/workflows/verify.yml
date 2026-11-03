@@ -13,6 +13,10 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,8 +33,8 @@ jobs:
           Rscript -e 'install.packages("remotes", repos="https://cloud.r-project.org")'
           Rscript -e 'remotes::install_version("survey", version="4.5", repos="https://cloud.r-project.org")'
           Rscript -e 'install.packages(c("haven","jsonlite"), repos="https://cloud.r-project.org")'
-      - name: Fetch NHANES files and refit
-        run: python3 pilot/fetch.py && python3 pilot/refit.py
+      - name: Prefetch NHANES files (refit runs inside make verify)
+        run: python3 pilot/fetch.py
       - name: make verify
         run: make verify
       - name: Working tree clean after verify
