@@ -1,0 +1,3 @@
+survey>=4.2
+haven>=2.5
+jsonlite>=1.8

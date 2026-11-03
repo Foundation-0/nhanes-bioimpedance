@@ -23,9 +23,12 @@ Part of Foundation0's life-sciences work. It began in the
 | Refitting all 13,276 spectra reproduces CDC's Cole parameters. For "excellent" spectra the median difference is 0.2% for Re, 2.3% for Ri and 1.2% for fc, and 0.011 for alpha; the median relative residual is 0.14%. | Claimed. Not reviewed by a person. These are **medians**, not a declared per-spectrum tolerance; tail errors are much larger (see results log). Part of the fc difference is rounding: CDC reports fc in whole kHz. |
 | The frequencies are those in CDC's variable labels, not an exact logarithmic grid. The labels differ from log spacing below 16 kHz and at 50, 100, 200 and 500 kHz, and the labelled grid fits 85% of spectra better. | Claimed. CDC's documentation calls the grid logarithmically spaced. |
 | 24 of the 305 spectra CDC "could not fit" fit with a residual below 1%. The rest are poor fits for us too (median residual 8%). | Claimed. Spectra not yet inspected by eye. |
-| CDC's time delay Td is negative for 46 spectra. | Counted from CDC's files. |
+| CDC's time delay Td is negative for 46 spectra. 36 of them are in CDC's "questionable" or "bad" fits, and they fit poorly here too: a negative Td marks a bad spectrum. | Claimed. |
+| **DXA lean mass.** A 50 kHz equation predicts DXA lean mass with R² ≈ 0.96 on a held-out survey cycle. The full spectrum adds 0.000–0.002. | Claimed. 11,828 participants, five DXA imputations. |
+| **Mortality.** In adults 20–49, 50 kHz phase angle predicts death (hazard ratio 0.66 per degree, adjusted for age and sex). The full spectrum adds no consistent discrimination: held-out C-index changes of +0.016, +0.001 and −0.008. | Claimed. 5,173 adults, 286 deaths to 2019. Survey weights and a PSU bootstrap; not a full design-based analysis. |
 
-The full output is in [results/pilot-2026-10-31.md](results/pilot-2026-10-31.md).
+The full output is in [results/pilot-2026-10-31.md](results/pilot-2026-10-31.md) and
+[results/outcomes-2026-10-31.md](results/outcomes-2026-10-31.md).
 
 ## Policy
 
@@ -57,11 +60,14 @@ re-checked with a full-text search.
 
 ## Method
 
-1. Download the BIX and DEMO files for 1999–2000, 2001–02 and 2003–04 from CDC (`pilot/fetch.py`).
+1. Download the BIX, DEMO, BMX and DXX files for 1999–2000, 2001–02 and 2003–04 from CDC, and the public-use Linked
+   Mortality Files from NCHS (`pilot/fetch.py`).
 2. Fit the Hydra 4200 Cole model to each spectrum: Z(f) = [R∞ + (R0 − R∞)/(1 + (jf/fc)^α)]·exp(−j2πf·Td), with
    R0 = Re and R∞ = Re·Ri/(Re + Ri). The fit minimises the relative complex residual over all 50 frequencies
    (`pilot/cole.py`).
 3. Compare the fit with CDC's published Re, Ri, fc, alpha and Td, by CDC's fit code (`pilot/refit.py`).
+4. Hold out one survey cycle at a time and compare a 50 kHz model with a full-spectrum model, for DXA lean mass and
+   for all-cause mortality (`pilot/outcomes.py`).
 
 ## How a result is checked
 
@@ -72,14 +78,16 @@ re-checked with a full-text search.
 
 ## What's next
 
-1. Look at the 24 recoverable spectra and at the spectra with negative Td: artefacts, or real?
-2. Link adults to the NCHS public-use Linked Mortality Files and test whether full-spectrum features (Re, Ri, alpha,
-   fc, the residual) predict death better than 50 kHz phase angle. Use the survey design, and hold out one survey
-   cycle.
-3. Compare with DXA from the same exam: do full-spectrum features explain lean mass better than 50 kHz?
-4. Write up the reproducibility check of CDC's Cole parameters as a short note.
+The first answer to the project's question is "little, for these outcomes in adults under 50". What is left:
 
-These will become task issues once a person approves them.
+1. Write up the reproducibility check of CDC's Cole parameters and the frequency labels as a short note, and ask
+   NCHS whether the labels are the true frequencies (needs a person).
+2. Test outcomes where cell membranes matter more than fluid volume: hydration and kidney function (serum
+   creatinine, cystatin C), inflammation (CRP), and children's growth, all in the same exams.
+3. Repeat the mortality comparison with cause-specific deaths (the files give the leading cause) and with a
+   design-based variance.
+
+The open issues track these.
 
 ## How to contribute
 
@@ -93,8 +101,9 @@ Agents start with [AGENTS.md](AGENTS.md). Foundation0's guide for agents is
 Python 3 with numpy, pandas and scipy (`pip install -r requirements.txt`).
 
 ```
-python3 pilot/fetch.py     # about 34 MB from CDC into data/
+python3 pilot/fetch.py     # about 130 MB from CDC and NCHS into data/
 python3 pilot/refit.py     # about 2 minutes; per-participant fits go to data/fits.csv, which is not committed
+python3 pilot/outcomes.py  # about 20 seconds
 ```
 
 ## Files
@@ -108,7 +117,9 @@ python3 pilot/refit.py     # about 2 minutes; per-participant fits go to data/fi
 | [`pilot/fetch.py`](pilot/fetch.py) | Downloads the CDC files |
 | [`pilot/cole.py`](pilot/cole.py) | The Cole model and the fit of one spectrum |
 | [`pilot/refit.py`](pilot/refit.py) | Refits every spectrum and compares with CDC |
-| [`results/pilot-2026-10-31.md`](results/pilot-2026-10-31.md) | Pilot output |
+| [`pilot/outcomes.py`](pilot/outcomes.py) | Recoverable spectra, DXA lean mass and mortality, held-out cycle |
+| [`results/pilot-2026-10-31.md`](results/pilot-2026-10-31.md) | Refit output |
+| [`results/outcomes-2026-10-31.md`](results/outcomes-2026-10-31.md) | Outcome analyses |
 | [`.github/`](.github/) | Pull request template, task form and the check workflow |
 
 ## Licence
