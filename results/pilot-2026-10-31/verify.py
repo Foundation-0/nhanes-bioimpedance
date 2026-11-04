@@ -18,6 +18,7 @@ DATA = ROOT / "data"
 sys.path.insert(0, str(ROOT / "pilot"))
 from fits_verify import (  # noqa: E402
     AGGREGATE_REL_TOL,
+    pilot_blas_env,
     verify_fits_aggregates,
 )
 
@@ -95,17 +96,17 @@ def stat_close(got: float, ref: float, abs_tol: float) -> bool:
 
 
 def main() -> int:
-    os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
-    os.environ.setdefault("OMP_NUM_THREADS", "1")
-    os.environ.setdefault("MKL_NUM_THREADS", "1")
+    env = pilot_blas_env()
+    os.environ.update(env)
     cert = json.loads(CERT_PATH.read_text())
-    subprocess.run([sys.executable, str(ROOT / "pilot" / "fetch.py")], check=True, cwd=ROOT)
+    subprocess.run([sys.executable, str(ROOT / "pilot" / "fetch.py")], check=True, cwd=ROOT, env={**os.environ, **env})
     proc = subprocess.run(
         [sys.executable, str(ROOT / "pilot" / "refit.py")],
         check=True,
         cwd=ROOT,
         capture_output=True,
         text=True,
+        env={**os.environ, **env},
     )
     got = parse_refit(proc.stdout)
     df = pd.read_csv(DATA / "fits.csv")

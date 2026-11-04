@@ -14,6 +14,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
+      OPENBLAS_CORETYPE: Haswell
       OPENBLAS_NUM_THREADS: "1"
       OMP_NUM_THREADS: "1"
       MKL_NUM_THREADS: "1"
@@ -26,14 +27,14 @@ jobs:
         run: pip install -r requirements.txt -r requirements-dev.txt
       - name: commitment pin checksums
         run: sha256sum --strict -c commitment/SHA256SUMS
-      # Pilot verify before setup-r: on CI, running refit after r-lib/actions/setup-r changed
-      # data/fits.csv bytes while printed aggregates stayed the same (failed run 41729837412,
-      # passing run 41732773657 after reorder in PR #9). The OpenBLAS/LD_LIBRARY_PATH story in
-      # that PR is unproven — grk-proof (orda-aska) could not reproduce it; verify now uses
-      # aggregate tolerances on fitted columns, not a byte hash of fits.csv.
+      - name: CPU and BLAS configuration
+        run: |
+          lscpu
+          python -c "import numpy; numpy.show_config()"
+      # Pilot verify before setup-r (PR #9 reorder); run 41746542087 drift cause CONJECTURE.
       - name: make verify-pilot-2026-10-31
         run: make verify-pilot-2026-10-31
-      - name: Pilot fits aggregate regression tests
+      - name: Pilot fits perturbation regression tests
         run: pytest -q tests/test_pilot_fits_verify.py
       - name: Install R
         uses: r-lib/actions/setup-r@v2

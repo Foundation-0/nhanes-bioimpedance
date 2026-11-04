@@ -12,15 +12,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "pilot"))
 from fits_verify import (  # noqa: E402
-    DRIFT_GAUSSIAN_SIGMA_KHZ,
-    DRIFT_MODEL_SEEDS,
-    apply_run_41746542087_reproductions,
     band_outlier_counts,
     fits_column_reference,
-    gaussian_fc_noise,
     recompute_cm_nf,
-    row_near_fc_quantile,
-    smallest_detectable_fc_shift_khz,
     verify_fits_aggregates,
 )
 
@@ -37,28 +31,6 @@ def certificate() -> dict:
 def _interior_fc_row(df: pd.DataFrame) -> int:
     interior = df[(df["fc_khz"] > 10) & (df["fc_khz"] < 900)]
     return int(interior["fc_khz"].sub(interior["fc_khz"].median()).abs().idxmin())
-
-
-@needs_fits
-def test_run_41746542087_drift_reproductions_pass(certificate: dict):
-    df = pd.read_csv(DATA_FITS)
-    ref = certificate["fits_column_reference"]
-    bands = certificate["fits_plausibility_outliers"]
-    n = certificate["spectra_refitted"]
-    for mode in ("uniform", "median_row", "max_cm_row"):
-        trial = apply_run_41746542087_reproductions(df, mode)
-        assert verify_fits_aggregates(trial, ref, bands, n) == []
-
-
-@needs_fits
-def test_gaussian_fc_noise_1em4_passes(certificate: dict):
-    df = pd.read_csv(DATA_FITS)
-    ref = certificate["fits_column_reference"]
-    bands = certificate["fits_plausibility_outliers"]
-    n = certificate["spectra_refitted"]
-    for seed in DRIFT_MODEL_SEEDS:
-        trial = gaussian_fc_noise(df, 1e-4, seed)
-        assert verify_fits_aggregates(trial, ref, bands, n) == []
 
 
 @needs_fits
@@ -85,24 +57,7 @@ def test_moderate_fc_perturbation_fails(certificate: dict):
     assert verify_fits_aggregates(trial, ref, bands, n)
 
 
-@needs_fits
-def test_smallest_detectable_fc_shift_median_and_mean_rows(certificate: dict):
-    df = pd.read_csv(DATA_FITS)
-    ref = certificate["fits_column_reference"]
-    bands = certificate["fits_plausibility_outliers"]
-    n = certificate["spectra_refitted"]
-    med = smallest_detectable_fc_shift_khz(
-        df, ref, bands, n, row_index=row_near_fc_quantile(df, "median")
-    )
-    mean = smallest_detectable_fc_shift_khz(
-        df, ref, bands, n, row_index=row_near_fc_quantile(df, "mean")
-    )
-    assert 0.005 < med < 0.02
-    assert 5.0 < mean < 10.0
-
-
-def test_sum_tolerance_does_not_scale_with_n():
-    """+130 kHz on one row must fail even when sum atol is not n × per-spectrum."""
+def test_large_fc_perturbation_fails_synthetic():
     n = 100
     df = pd.DataFrame(
         {

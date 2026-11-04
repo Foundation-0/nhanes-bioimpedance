@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -15,6 +16,7 @@ from fits_verify import (  # noqa: E402
     aggregate_tolerance_table,
     band_outlier_counts,
     fits_column_reference,
+    pilot_blas_env,
 )
 
 CERT = ROOT / "results" / "pilot-2026-10-31" / "certificate.json"
@@ -77,6 +79,7 @@ def main() -> int:
         capture_output=True,
         text=True,
         check=True,
+        env={**os.environ, **pilot_blas_env()},
     )
     parsed = parse_refit(proc.stdout)
     df = pd.read_csv(ROOT / "data" / "fits.csv")
