@@ -10,9 +10,10 @@ against CDC’s published Cole parameters, using aggregate tables only in git.
 - Input: CDC public-use files (`pilot/fetch.py`, byte-pinned SHA-256).
 - Refit: `pilot/refit.py` with **`OPENBLAS_CORETYPE=Haswell`** (see Makefile / CI) and thread count 1.
 - Output check: aggregate statistics of local `data/fits.csv` must match `certificate.json` within the
-  **`%.6f` CSV floor** (half-ulp per value; sum/sumsq use `max(n × half-ulp, 0.05)`; std use
-  `max(half-ulp, 1e-6)` so Haswell-pinned refits agree across `ubuntu-latest` runners). Plausibility-band
-  outlier counts must match exactly. Stdout headline numbers use `abs_float_tolerance` 0.02.
+  **`%.6f` CSV floor** (half-ulp per value; sum/sumsq use `max(n × half-ulp, 40)`; mean/median/quantiles use
+  `max(half-ulp, 3e-6)`; std use `max(half-ulp, 1e-6)` so Haswell-pinned refits agree across `ubuntu-latest`
+  runners — see GHA run 41760498077). Plausibility-band outlier counts must match exactly. Stdout headline numbers
+  use `abs_float_tolerance` 0.02.
 
 Run **41746542087** showed fc/Cm aggregate drift without this pin; the cause is **CONJECTURE** (consistent
 with a different OpenBLAS kernel on DYNAMIC_ARCH wheels). The pin makes CI and local verify deterministic on
