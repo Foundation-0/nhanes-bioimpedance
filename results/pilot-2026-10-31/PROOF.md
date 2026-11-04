@@ -5,32 +5,39 @@
 Independent refit of all completed NHANES 1999–2004 whole-body bioimpedance spectra (13,276 exams)
 against CDC’s published Cole parameters, using aggregate tables only in git.
 
-## Scope
+## Verify gate (strict)
 
-- Input: CDC BIX and DEMO public-use files for 1999–2004 (`pilot/fetch.py`, size and SHA-256 pinned).
-- Output: aggregate stdout from `pilot/refit.py` and SHA-256 of local `data/fits.csv` (not committed).
-- **Not** a tolerance certificate on every tail error; README medians summarize typical agreement. Max relative
-  errors on excellent-fit rows remain wide in the tails (see grk-proof review on PR #7).
+- Input: CDC public-use files (`pilot/fetch.py`, byte-pinned SHA-256).
+- Refit: `pilot/refit.py` with **`OPENBLAS_CORETYPE=Haswell`** (see Makefile / CI) and thread count 1.
+- Output check: aggregate statistics of local `data/fits.csv` must match `certificate.json` within the
+  **`%.6f` CSV floor** (half-ulp per value; sum/sumsq use `max(n × half-ulp, 40)`; mean/median/quantiles use
+  `max(half-ulp, 3e-6)`; std use `max(half-ulp, 1e-6)` so Haswell-pinned refits agree across `ubuntu-latest`
+  runners — see GHA run 41760498077). Plausibility-band outlier counts must match exactly. Stdout headline numbers
+  use `abs_float_tolerance` 0.02.
 
-## Evidence
+Run **41746542087** showed fc/Cm aggregate drift without this pin; the cause is **CONJECTURE** (consistent
+with a different OpenBLAS kernel on DYNAMIC_ARCH wheels). The pin makes CI and local verify deterministic on
+`ubuntu-latest` (see CI logs: `lscpu`, `numpy.show_config()`).
 
-Full human-readable log: [../pilot-2026-10-31.md](../pilot-2026-10-31.md).
+## Kernel robustness (not a gate)
 
-Locked numbers in `certificate.json` are replay-checked by `verify.py` with declared float tolerance
-(`checks.abs_float_tolerance`), not environment metadata.
+**VERIFIED** record: [kernel-robustness.md](kernel-robustness.md) from `kernel_robustness.py` — same deps,
+refitting under Haswell, Sandybridge and Prescott `OPENBLAS_CORETYPE` values shows ~10⁴-row changes per column
+and whether headline statistics move at published precision.
 
 ## Reproduce
 
 ```bash
-pip install -r requirements.txt
+sha256sum --strict -c commitment/SHA256SUMS
 make verify-pilot-2026-10-31
+pytest -q tests/test_pilot_fits_verify.py
 ```
 
 ## Prior art
 
-CDC/NCHS NHANES BIX documentation and published fit codes (see `NOTICE.md`).
+CDC/NCHS NHANES BIX documentation (see `NOTICE.md`).
 
 ## Limits
 
-- CDC’s fitting algorithm is proprietary; we compare to their published parameters, not to ground truth.
-- Associations in later outcomes work are separate results (`results/outcomes-2026-10-31/` on PR #8).
+- Not a per-spectrum tail-error certificate; README medians summarize typical agreement.
+- CDC’s fitting algorithm is proprietary.
