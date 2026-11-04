@@ -16,26 +16,12 @@ CERT_PATH = ROOT / "results" / "pilot-2026-10-31" / "certificate.json"
 DATA = ROOT / "data"
 
 sys.path.insert(0, str(ROOT / "pilot"))
-from fits_csv import AUX_NUMERIC_COLUMNS, COLE_COLUMNS  # noqa: E402
+from fits_verify import (  # noqa: E402
+    AGGREGATE_REL_TOL,
+    verify_fits_aggregates,
+)
 
-# Fixed per-spectrum absolute tolerances for fitted columns (not tuned to CI BLAS drift).
-# Excellent-fit Re agreement in the pilot is ~0.2% (~1 Ω on ~500 Ω); these are orders of magnitude tighter.
-FIT_COLUMN_ABS_TOL: dict[str, float] = {
-    "re": 0.05,
-    "ri": 0.05,
-    # fc is continuous in the fit but CDC publishes whole kHz; sub-0.01 kHz shifts are below CDC quantization.
-    "fc_khz": 0.01,
-    "alpha": 1e-6,
-    "td_ns": 1e-3,
-    "cm_nf": 1e-3,
-    "rms": 1e-7,
-    "max_abs": 1e-6,
-    "rms_log_grid": 1e-7,
-    "phase_50k_deg": 1e-4,
-}
-FIT_COLUMN_REL_TOL = 1e-9
-AGG_STATS = ("sum", "median", "mean", "min", "max")
-CHECK_COLUMNS = COLE_COLUMNS + AUX_NUMERIC_COLUMNS
+STDOUT_FLOAT_ABS_TOL = 0.02
 
 
 def parse_refit(text: str) -> dict:
@@ -103,46 +89,9 @@ def parse_refit(text: str) -> dict:
     return out
 
 
-def stat_close(got: float, ref: float, abs_tol: float, rel_tol: float) -> bool:
+def stat_close(got: float, ref: float, abs_tol: float) -> bool:
     scale = max(abs(ref), 1e-30)
-    return abs(got - ref) <= abs_tol + rel_tol * scale
-
-
-def sum_close(got: float, ref: float, n: int, abs_per_spec: float, rel_tol: float) -> bool:
-    scale = max(abs(ref), 1e-30)
-    return abs(got - ref) <= abs_per_spec * n + rel_tol * scale
-
-
-def column_aggregates(series: pd.Series) -> dict[str, float]:
-    s = series.astype(float)
-    return {
-        "sum": float(s.sum()),
-        "median": float(s.median()),
-        "mean": float(s.mean()),
-        "min": float(s.min()),
-        "max": float(s.max()),
-    }
-
-
-def verify_fits_columns(df: pd.DataFrame, ref: dict, n: int) -> list[str]:
-    errors: list[str] = []
-    if len(df) != n:
-        errors.append(f"fits rows: got {len(df)} cert {n}")
-    for col in CHECK_COLUMNS:
-        if col not in df.columns:
-            errors.append(f"fits.csv missing column {col}")
-            continue
-        got = column_aggregates(df[col])
-        want = ref["columns"][col]
-        abs_tol = FIT_COLUMN_ABS_TOL[col]
-        for stat in AGG_STATS:
-            if stat == "sum":
-                ok = sum_close(got[stat], float(want[stat]), n, abs_tol, FIT_COLUMN_REL_TOL)
-            else:
-                ok = stat_close(got[stat], float(want[stat]), abs_tol, FIT_COLUMN_REL_TOL)
-            if not ok:
-                errors.append(f"fits.{col}.{stat}: got {got[stat]} cert {want[stat]}")
-    return errors
+    return abs(got - ref) <= abs_tol + AGGREGATE_REL_TOL * scale
 
 
 def main() -> int:
@@ -150,7 +99,6 @@ def main() -> int:
     os.environ.setdefault("OMP_NUM_THREADS", "1")
     os.environ.setdefault("MKL_NUM_THREADS", "1")
     cert = json.loads(CERT_PATH.read_text())
-    tol_f = cert["checks"]["abs_float_tolerance"]
     subprocess.run([sys.executable, str(ROOT / "pilot" / "fetch.py")], check=True, cwd=ROOT)
     proc = subprocess.run(
         [sys.executable, str(ROOT / "pilot" / "refit.py")],
@@ -161,7 +109,12 @@ def main() -> int:
     )
     got = parse_refit(proc.stdout)
     df = pd.read_csv(DATA / "fits.csv")
-    fit_errors = verify_fits_columns(df, cert["fits_column_reference"], cert["spectra_refitted"])
+    fit_errors = verify_fits_aggregates(
+        df,
+        cert["fits_column_reference"],
+        cert["fits_plausibility_outliers"],
+        cert["spectra_refitted"],
+    )
     if fit_errors:
         for msg in fit_errors:
             print(msg, file=sys.stderr)
@@ -195,10 +148,10 @@ def main() -> int:
         "phase_50k_iqr_high_deg",
     )
     for key in float_keys:
-        if not stat_close(float(got[key]), float(cert[key]), tol_f, FIT_COLUMN_REL_TOL):
+        if not stat_close(float(got[key]), float(cert[key]), STDOUT_FLOAT_ABS_TOL):
             print(f"{key}: got {got[key]} cert {cert[key]}", file=sys.stderr)
             return 1
-    print(f"OK pilot-2026-10-31 n={cert['spectra_refitted']} fits_columns={len(CHECK_COLUMNS)}")
+    print(f"OK pilot-2026-10-31 n={cert['spectra_refitted']}")
     return 0
 
 

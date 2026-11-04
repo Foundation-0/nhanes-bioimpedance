@@ -17,9 +17,11 @@ jobs:
           python-version: "3.12"
       - name: Install test deps
         run: pip install -r requirements.txt pyarrow pytest
+      - name: commitment pin checksums
+        run: sha256sum --strict -c commitment/SHA256SUMS
       - name: The pilot scripts compile
         run: python -m py_compile pilot/*.py scripts/*.py
       - name: No per-participant data is committed
         run: python3 scripts/check_no_participant_data.py
       - name: Participant guard unit tests
-        run: pytest -q tests/test_participant_guard.py
+        run: pytest -q tests/test_participant_guard.py tests/test_pilot_fits_verify.py::test_sum_tolerance_does_not_scale_with_n

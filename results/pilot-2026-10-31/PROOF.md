@@ -16,25 +16,25 @@ against CDC’s published Cole parameters, using aggregate tables only in git.
 
 Full human-readable log: [../pilot-2026-10-31.md](../pilot-2026-10-31.md).
 
-`certificate.json` locks aggregate stdout numbers and, for each fitted Cole parameter column (Re, Ri, fc, α,
-Td, Cm, rms, max_abs, plus log-grid rms and 50 kHz phase), the sum/median/mean/min/max over all 13,276
-spectra. `verify.py` replays the pilot and checks those statistics with fixed per-spectrum absolute tolerances
-(documented in the certificate and in `verify.py`), not a byte SHA-256 of `fits.csv`. Input files remain
-byte-pinned in `pilot/fetch.py` because that is the public CDC evidence chain.
+`certificate.json` locks aggregate stdout numbers and, for each fitted Cole column, sum/median/mean/min/max/std,
+sum of squares, and p1/p5/p95/p99, plus counts of spectra outside plausibility bands (`pilot/fits_verify.py`).
+Each aggregate has its own absolute tolerance: **3×** the cross-platform drift measured on GitHub Actions run
+**41746542087** where applicable (fc sum 2.77 kHz, fc mean 2.1×10⁻⁴ kHz, Cm max 1.0×10⁻⁴ nF), otherwise **3×**
+a `%.6f` CSV round-trip floor. Input files remain byte-pinned in `pilot/fetch.py`.
 
 ## CI note (CONJECTURE)
 
 GitHub Actions run **41729837412** failed the old `fits.csv` SHA-256 check when the pilot ran after
 `r-lib/actions/setup-r`; run **41732773657** passed after PR #9 reordered steps. That reorder is **PROVEN**
 empirically. A comment in PR #9 blamed R’s OpenBLAS on `LD_LIBRARY_PATH`; grk-proof (orda-aska) tested that
-path and could not confirm it (**CONJECTURE**). The workflow still runs pilot verify before R; the verifier no
-longer depends on CSV bytes.
+path and could not confirm it (**CONJECTURE**). The workflow still runs pilot verify before R.
 
 ## Reproduce
 
 ```bash
 pip install -r requirements.txt
 make verify-pilot-2026-10-31
+pytest -q tests/test_pilot_fits_verify.py
 ```
 
 ## Prior art
