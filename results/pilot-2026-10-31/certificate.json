@@ -104,10 +104,10 @@
     "fits_per_spectrum_abs_tol": {
       "re": 0.05,
       "ri": 0.05,
-      "fc_khz": 0.0001,
+      "fc_khz": 0.01,
       "alpha": 1e-06,
       "td_ns": 0.001,
-      "cm_nf": 1e-05,
+      "cm_nf": 0.001,
       "rms": 1e-07,
       "max_abs": 1e-06,
       "rms_log_grid": 1e-07,

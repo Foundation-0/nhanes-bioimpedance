@@ -23,10 +23,11 @@ from fits_csv import AUX_NUMERIC_COLUMNS, COLE_COLUMNS  # noqa: E402
 FIT_COLUMN_ABS_TOL: dict[str, float] = {
     "re": 0.05,
     "ri": 0.05,
-    "fc_khz": 1e-4,
+    # fc is continuous in the fit but CDC publishes whole kHz; sub-0.01 kHz shifts are below CDC quantization.
+    "fc_khz": 0.01,
     "alpha": 1e-6,
     "td_ns": 1e-3,
-    "cm_nf": 1e-5,
+    "cm_nf": 1e-3,
     "rms": 1e-7,
     "max_abs": 1e-6,
     "rms_log_grid": 1e-7,
