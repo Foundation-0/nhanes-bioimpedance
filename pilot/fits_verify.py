@@ -61,6 +61,7 @@ def aggregate_tolerance_table() -> dict[str, Any]:
         "fits_csv_float_format": FLOAT_FORMAT,
         "csv6_half_ulp": CSV6_HALF_ULP,
         "sum_sumsq_min_abs_tol": SUM_SUMSQ_MIN_ABS_TOL,
+        "std_min_abs_tol": STD_MIN_ABS_TOL,
         "columns": {
             col: {stat: aggregate_abs_tolerance(col, stat) for stat in AGG_STATS}
             for col in CHECK_COLUMNS
