@@ -12,6 +12,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cole import F_LABEL, F_LOG, R_COLS, X_COLS, fit_spectrum  # noqa: E402
+from fits_csv import FLOAT_FORMAT  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -55,7 +56,7 @@ def main():
                          cdc_re=r.BIDRECF, cdc_ri=r.BIDRICF, cdc_fc=r.BIDFC, cdc_alpha=r.BIDALPHA, cdc_td=r.BIDTD,
                          cdc_cm=r.BIDCM, phase_50k_deg=float(np.degrees(np.arctan2(X[21], R[21]))), **a))
     fits = pd.DataFrame(rows)
-    fits.to_csv(DATA / "fits.csv", index=False)
+    fits.to_csv(DATA / "fits.csv", index=False, float_format=FLOAT_FORMAT)
 
     print(f"Spectra refitted: {len(fits)}")
     print(f"Labelled frequency grid fits better than an exact log grid in "

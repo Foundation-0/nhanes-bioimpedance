@@ -5,14 +5,114 @@
   "spectra_refitted": 13276,
   "completed_exams_with_all_frequencies": 13276,
   "log_grid_better_fraction": 0.85,
+  "label_grid_median_rms": 0.0014,
+  "log_grid_median_rms": 0.0019,
   "excellent_n": 12369,
   "excellent_re_median_rel_pct": 0.2,
   "excellent_ri_median_rel_pct": 2.3,
   "excellent_fc_median_rel_pct": 1.2,
+  "excellent_rms_median": 0.0014,
+  "excellent_rms_p95": 0.003,
+  "excellent_rms_above_0_01": 2,
+  "code5_n": 305,
+  "code5_median_rms": 0.0813,
+  "code5_rms_below_0_01": 24,
+  "cdc_td_median_ns": 4.83,
+  "ours_td_median_ns": 4.19,
+  "cdc_td_negative_n": 46,
   "phase_50k_median_deg": 6.58,
-  "fits_csv_sha256": "c075b4eecc234411af8b416c13591ecdec23997ee6f8a41becb5c45e6acd5f00",
+  "phase_50k_iqr_low_deg": 5.98,
+  "phase_50k_iqr_high_deg": 7.28,
+  "fits_column_reference": {
+    "n": 13276,
+    "columns": {
+      "re": {
+        "sum": 8991405.584251,
+        "median": 670.3992949999999,
+        "mean": 677.2676697989605,
+        "min": 303.144976,
+        "max": 4664.780247
+      },
+      "ri": {
+        "sum": 17721729.133550998,
+        "median": 1314.565563,
+        "mean": 1334.8696244012501,
+        "min": 1.0,
+        "max": 3368.744729
+      },
+      "fc_khz": {
+        "sum": 815616.8558390001,
+        "median": 48.70603,
+        "mean": 61.43543656515517,
+        "min": 1.0,
+        "max": 1000.0
+      },
+      "alpha": {
+        "sum": 8743.082649,
+        "median": 0.6628805,
+        "mean": 0.658563019659536,
+        "min": 0.3,
+        "max": 1.0
+      },
+      "td_ns": {
+        "sum": 51599.997446,
+        "median": 4.1877575,
+        "mean": 3.886712672943658,
+        "min": -100.0,
+        "max": 100.0
+      },
+      "cm_nf": {
+        "sum": 24133.19658,
+        "median": 1.6142205,
+        "mean": 1.8178063106357336,
+        "min": 0.095452,
+        "max": 114.738951
+      },
+      "rms": {
+        "sum": 62.805991,
+        "median": 0.0014195,
+        "mean": 0.004730791729436577,
+        "min": 0.000571,
+        "max": 0.426564
+      },
+      "max_abs": {
+        "sum": 226.737331,
+        "median": 0.004231,
+        "mean": 0.01707873840012052,
+        "min": 0.001257,
+        "max": 1.757592
+      },
+      "rms_log_grid": {
+        "sum": 68.202866,
+        "median": 0.0019,
+        "mean": 0.005137305363061163,
+        "min": 0.000934,
+        "max": 0.425856
+      },
+      "phase_50k_deg": {
+        "sum": 88436.95824900002,
+        "median": 6.5797635,
+        "mean": 6.6614159572913545,
+        "min": 2.819872,
+        "max": 23.069984
+      }
+    }
+  },
   "checks": {
     "abs_int_tolerance": 0,
-    "abs_float_tolerance": 0.02
+    "abs_float_tolerance": 0.02,
+    "fits_per_spectrum_abs_tol": {
+      "re": 0.05,
+      "ri": 0.05,
+      "fc_khz": 0.0001,
+      "alpha": 1e-06,
+      "td_ns": 0.001,
+      "cm_nf": 1e-05,
+      "rms": 1e-07,
+      "max_abs": 1e-06,
+      "rms_log_grid": 1e-07,
+      "phase_50k_deg": 0.0001
+    },
+    "fits_aggregate_rel_tol": 1e-09
   }
 }

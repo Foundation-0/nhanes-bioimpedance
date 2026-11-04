@@ -24,8 +24,11 @@ jobs:
           python-version: "3.12"
       - name: Install Python dependencies
         run: pip install -r requirements.txt -r requirements-dev.txt
-      # Pilot refit uses SciPy on NumPy's BLAS. setup-r prepends R's OpenBLAS to LD_LIBRARY_PATH,
-      # which changes Cole fit bytes while aggregates still match — run pilot verify before R.
+      # Pilot verify before setup-r: on CI, running refit after r-lib/actions/setup-r changed
+      # data/fits.csv bytes while printed aggregates stayed the same (failed run 41729837412,
+      # passing run 41732773657 after reorder in PR #9). The OpenBLAS/LD_LIBRARY_PATH story in
+      # that PR is unproven — grk-proof (orda-aska) could not reproduce it; verify now uses
+      # aggregate tolerances on fitted columns, not a byte hash of fits.csv.
       - name: make verify-pilot-2026-10-31
         run: make verify-pilot-2026-10-31
       - name: Install R
