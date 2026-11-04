@@ -32,8 +32,6 @@ jobs:
           lscpu
           python -c "import numpy; numpy.show_config()"
       # Pilot verify before setup-r (PR #9 reorder); run 41746542087 drift cause CONJECTURE.
-- name: Sync pilot certificate to Haswell runner
-        run: python3 results/pilot-2026-10-31/refresh_certificate.py
       - name: make verify-pilot-2026-10-31
         run: make verify-pilot-2026-10-31
       - name: Pilot fits perturbation regression tests
