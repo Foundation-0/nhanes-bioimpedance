@@ -59,11 +59,11 @@
         "events": 83,
         "hr_per_sd_pha50": 0.6592927691897436,
         "jackknife_ci95": [
-          0.4860963937967714,
-          0.8941990951852387
+          0.48609639379677083,
+          0.8941990951852399
         ],
         "jackknife_ci95_method": "delete_one_PSU_jackknife",
-        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.00045791762476132813,
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.0004579176247601069,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",
@@ -129,13 +129,13 @@
         ],
         "design_ci95_method": "survey::svycoxph",
         "events": 53,
-        "hr_per_sd_pha50": 0.8004317458463928,
+        "hr_per_sd_pha50": 0.800431745846393,
         "jackknife_ci95": [
-          0.41627989651094083,
-          1.539087006431658
+          0.41627989651094094,
+          1.5390870064316582
         ],
         "jackknife_ci95_method": "delete_one_PSU_jackknife",
-        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.10760703003165806,
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.10760703003165828,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",
@@ -162,7 +162,7 @@
           "standardization": "train_cycles_only_unweighted_mean_sd_ddof1"
         },
         {
-          "cindex_age_sex": 0.627362334604217,
+          "cindex_age_sex": 0.6273489129885131,
           "cindex_full_spectrum": 0.6164219886114755,
           "cindex_phase50": 0.6390026462740005,
           "cycle": "2001-2002",
@@ -203,11 +203,11 @@
         "events": 150,
         "hr_per_sd_pha50": 0.654816225298541,
         "jackknife_ci95": [
-          0.4640048143293576,
-          0.9240944827996378
+          0.4640048143293577,
+          0.9240944827996376
         ],
         "jackknife_ci95_method": "delete_one_PSU_jackknife",
-        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.028451510369637778,
+        "jackknife_vs_svycoxph_max_abs_ci_gap": 0.028451510369637556,
         "standardization": {
           "ddof": 1,
           "method": "unweighted_sample_mean_and_sd",

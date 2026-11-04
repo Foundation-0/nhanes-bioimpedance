@@ -1,0 +1,177 @@
+{
+  "generated_on": "2026-11-04",
+  "baseline_coretype": "Haswell",
+  "kernels": [
+    "Haswell",
+    "Sandybridge",
+    "Prescott"
+  ],
+  "numpy_show_config": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: /opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/include\n    lib directory: /opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/lib\n    name: scipy-openblas\n    openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY\n      SkylakeX MAX_THREADS=64\n    pc file directory: /project/.openblas\n    version: 0.3.34.106.0\n  lapack:\n    detection method: pkgconfig\n    found: true\n    include directory: /opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/include\n    lib directory: /opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/lib\n    name: scipy-openblas\n    openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY\n      SkylakeX MAX_THREADS=64\n    pc file directory: /project/.openblas\n    version: 0.3.34.106.0\nCompilers:\n  c:\n    commands: cc\n    linker: ld.bfd\n    name: gcc\n    version: 14.2.1\n  c++:\n    commands: c++\n    linker: ld.bfd\n    name: gcc\n    version: 14.2.1\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.3.0\nMachine Information:\n  build:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\n  host:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\nPython Information:\n  path: /tmp/build-env-ptu49_tp/bin/python\n  version: '3.12'\nSIMD Extensions:\n  baseline:\n  - X86_V2\n  found:\n  - X86_V3\n  - X86_V4\n  - AVX512_ICL\n  - AVX512_SPR\n\n",
+  "runs": {
+    "Haswell": {
+      "headlines": {
+        "spectra_refitted": 13276,
+        "log_grid_better_pct": 85,
+        "excellent_n": 12369,
+        "excellent_re_med_pct": 0.2,
+        "excellent_ri_med_pct": 2.3,
+        "excellent_fc_med_pct": 1.2,
+        "phase_median_deg": 6.58,
+        "phase_iqr_lo": 5.98,
+        "phase_iqr_hi": 7.28
+      },
+      "per_column": {
+        "re": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "ri": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "fc_khz": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "alpha": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "td_ns": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "cm_nf": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "rms": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "max_abs": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "rms_log_grid": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "phase_50k_deg": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        }
+      }
+    },
+    "Sandybridge": {
+      "headlines": {
+        "spectra_refitted": 13276,
+        "log_grid_better_pct": 85,
+        "excellent_n": 12369,
+        "excellent_re_med_pct": 0.2,
+        "excellent_ri_med_pct": 2.3,
+        "excellent_fc_med_pct": 1.2,
+        "phase_median_deg": 6.58,
+        "phase_iqr_lo": 5.98,
+        "phase_iqr_hi": 7.28
+      },
+      "per_column": {
+        "re": {
+          "rows_changed": 3882,
+          "max_abs_delta": 0.24384099999997488
+        },
+        "ri": {
+          "rows_changed": 10765,
+          "max_abs_delta": 3.8055420000000595
+        },
+        "fc_khz": {
+          "rows_changed": 2412,
+          "max_abs_delta": 2.8222390000000246
+        },
+        "alpha": {
+          "rows_changed": 57,
+          "max_abs_delta": 0.0007969999999999922
+        },
+        "td_ns": {
+          "rows_changed": 818,
+          "max_abs_delta": 0.048973000000000155
+        },
+        "cm_nf": {
+          "rows_changed": 169,
+          "max_abs_delta": 0.0023699999999999832
+        },
+        "rms": {
+          "rows_changed": 1,
+          "max_abs_delta": 9.999999999992654e-07
+        },
+        "max_abs": {
+          "rows_changed": 18,
+          "max_abs_delta": 7.300000000000015e-05
+        },
+        "rms_log_grid": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        },
+        "phase_50k_deg": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        }
+      }
+    },
+    "Prescott": {
+      "headlines": {
+        "spectra_refitted": 13276,
+        "log_grid_better_pct": 85,
+        "excellent_n": 12369,
+        "excellent_re_med_pct": 0.2,
+        "excellent_ri_med_pct": 2.3,
+        "excellent_fc_med_pct": 1.2,
+        "phase_median_deg": 6.58,
+        "phase_iqr_lo": 5.98,
+        "phase_iqr_hi": 7.28
+      },
+      "per_column": {
+        "re": {
+          "rows_changed": 3879,
+          "max_abs_delta": 0.24384099999997488
+        },
+        "ri": {
+          "rows_changed": 10772,
+          "max_abs_delta": 3.8055420000000595
+        },
+        "fc_khz": {
+          "rows_changed": 2420,
+          "max_abs_delta": 2.8222390000000246
+        },
+        "alpha": {
+          "rows_changed": 57,
+          "max_abs_delta": 0.0007969999999999922
+        },
+        "td_ns": {
+          "rows_changed": 833,
+          "max_abs_delta": 0.048973000000000155
+        },
+        "cm_nf": {
+          "rows_changed": 169,
+          "max_abs_delta": 0.0023699999999999832
+        },
+        "rms": {
+          "rows_changed": 1,
+          "max_abs_delta": 9.999999999992654e-07
+        },
+        "max_abs": {
+          "rows_changed": 16,
+          "max_abs_delta": 7.300000000000015e-05
+        },
+        "rms_log_grid": {
+          "rows_changed": 1,
+          "max_abs_delta": 9.999999999732445e-07
+        },
+        "phase_50k_deg": {
+          "rows_changed": 0,
+          "max_abs_delta": 0.0
+        }
+      }
+    }
+  }
+}
