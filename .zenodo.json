@@ -1,0 +1,25 @@
+{
+    "creators": [
+        {
+            "name": "Arifuddin, Ahraz"
+        }
+    ],
+    "title": "nhanes-bioimpedance",
+    "description": "<p>This repository refits the full 50-frequency bioimpedance spectra from NHANES 1999-2004 (about 13,000 Americans aged 8 to 49) and asks whether the whole spectrum predicts outcomes better than the 50 kHz phase angle that published studies use.</p><p>Status: pilot, claimed, not peer reviewed.</p><p>Claimed findings include that refitting all 13,276 spectra reproduces CDC's Cole parameters; that a 50 kHz equation predicts DXA lean mass with R^2 ≈ 0.96 on a held-out survey cycle while the full spectrum adds 0.000-0.002; and that in 5,173 adults aged 20-49, 50 kHz phase angle predicts death (hazard ratio 0.66 per degree, adjusted for age and sex) while the full spectrum adds no consistent discrimination.</p><p>Directed by Ahraz Arifuddin</p><p>Researched and verified by different model families across Gemini, Claude, Grok, OpenAI, and Muse</p>",
+    "upload_type": "software",
+    "license": "Apache-2.0",
+    "keywords": [
+        "NHANES",
+        "bioimpedance",
+        "body-composition",
+        "mortality"
+    ],
+    "related_identifiers": [
+        {
+            "identifier": "https://github.com/Foundation-0/nhanes-bioimpedance",
+            "relation": "isSupplementTo",
+            "scheme": "url",
+            "resource_type": "software"
+        }
+    ]
+}
